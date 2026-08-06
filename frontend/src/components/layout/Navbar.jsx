@@ -97,6 +97,15 @@ function Navbar() {
                                 </Link>
                             )}
 
+                            {user?.role === 'TENANT_ADMIN' && (
+                                <Link
+                                    to="/tenant/dashboard"
+                                    className="btn-primary px-4 py-2 text-sm"
+                                >
+                                    Dashboard
+                                </Link>
+                            )}
+
                             {user?.role === 'ADMIN' && (
                                 <Link
                                     to="/admin/dashboard"

@@ -207,16 +207,16 @@ npm run dev
 ### Role: TENANT_ADMIN (brand manager)
 
 1. Register with the *Tenant Slug* of an existing brand (e.g. `apple`), or have a platform `ADMIN` promote you via the admin dashboard. Log in as that user.
-2. When promoted by an `ADMIN`, you are **alerted in-app** — a toast pops up and a notification appears in the bell icon (top-right) saying you have been made `TENANT ADMIN` of that brand. Sign out and back in to refresh your token so the Dashboard link appears.
-3. Open the **Dashboard** link (top-right) → `/tenant/dashboard`.
+2. When promoted by an `ADMIN`, you are **alerted in-app** — a toast pops up and a notification appears in the bell icon (top-right) saying you have been made `TENANT ADMIN` of that brand. Sign out and back in to refresh your token so the **Dashboard** button appears.
+3. The **Dashboard** button (top-right, shown only for `TENANT_ADMIN` in both the desktop and mobile navbars) → `/tenant/dashboard`.
 4. **Manage products** (`/tenant/dashboard/products`):
    - Add new products (name, description, price, category, stock, image).
    - Edit existing products.
    - Update stock quantities.
    - Delete products.
    - These changes appear immediately on the public storefront of that brand.
-5. **View orders** (`/tenant/dashboard/orders`): see every order placed on your brand, with customer, totals, status and items.
-6. **Tenant isolation check:** you can only manage products/orders of *your* brand. Attempts to modify another brand's products (e.g. a `PATCH /sony/products/{id}/stock`) are rejected with `403`.
+5. **View orders** (`/tenant/dashboard/orders`): every order successfully placed on your brand is saved permanently to the database and listed here the moment it is created — customer, totals, status and items.
+6. **Tenant isolation check:** you can only manage products and view orders of *your* brand. Attempts to modify another brand's products (e.g. a `PATCH /sony/products/{id}/stock`) **or** to read another brand's orders (`GET /sony/orders`) are rejected with `403` — even though the endpoint exists, the backend only returns orders that belong to your tenant.
 7. You can still shop as a normal customer (cart, favourites, orders) for your own brand.
 
 ---
@@ -227,7 +227,7 @@ npm run dev
 2. Click **Admin** (top-right) → `/admin/dashboard`. The dashboard has three sections:
    - **Brands:** add a new brand (name, slug, description, logo) or delete an existing one. Deleting a brand removes it from the storefront.
    - **Assign Brand Admin:** pick any regular `USER` and assign them a brand → they are promoted to `TENANT_ADMIN` (role + `tenantSlug` attribute are applied in Keycloak **behind the scenes**) and the promoted user is **informed by an in-app alert** that they have been made `TENANT ADMIN` of that brand.
-   - **All Orders:** view every order placed across all brands.
+   - **All Orders:** view every order placed across all brands — each successfully placed order is persisted forever, whether or not the brand still exists.
 3. **Product oversight:** like a tenant admin, the `ADMIN` can also create / edit / delete products and update stock on any brand.
 4. **Negative check:** an `ADMIN` cannot place orders (rejected by the backend), and cart navigation is hidden for admins.
 

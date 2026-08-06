@@ -43,6 +43,9 @@ public class OrderServiceTest {
     @Mock
     private TenantService tenantService;
 
+    @Mock
+    private ProductService productService;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -300,5 +303,90 @@ public class OrderServiceTest {
                 orderService.createOrder("global", createOrderRequest, customer));
 
         verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void testGetTenantOrders_OwnTenantAdmin_ReturnsOrders() {
+        User nikeAdmin = User.builder()
+                .id(10L)
+                .username("nike_admin")
+                .role(Role.TENANT_ADMIN)
+                .tenant(nikeTenant)
+                .build();
+
+        Order savedOrder = Order.builder()
+                .id(500L)
+                .user(customer)
+                .tenant(nikeTenant)
+                .orderDate(LocalDateTime.now())
+                .totalQuantity(2)
+                .totalAmount(BigDecimal.valueOf(200.0))
+                .status(OrderStatus.COMPLETED)
+                .items(Collections.emptyList())
+                .build();
+
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        doNothing().when(productService).validateTenantAccess(nikeAdmin, nikeTenant);
+        when(orderRepository.findByTenantIdOrderByOrderDateDesc(1L))
+                .thenReturn(Collections.singletonList(savedOrder));
+
+        var orders = orderService.getTenantOrders("nike", nikeAdmin);
+
+        assertNotNull(orders);
+        assertEquals(1, orders.size());
+        assertEquals(500L, orders.get(0).getId());
+        verify(productService, times(1)).validateTenantAccess(nikeAdmin, nikeTenant);
+    }
+
+    @Test
+    void testGetTenantOrders_WrongTenantAdmin_ThrowsUnauthorized() {
+        Tenant adidasTenant = Tenant.builder().id(2L).name("Adidas").slug("adidas").build();
+        User adidasAdmin = User.builder()
+                .id(11L)
+                .username("adidas_admin")
+                .role(Role.TENANT_ADMIN)
+                .tenant(adidasTenant)
+                .build();
+
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        doThrow(new UnauthorizedAccessException(
+                "Tenant user cannot perform management operations on another tenant's domain: nike"))
+                .when(productService).validateTenantAccess(adidasAdmin, nikeTenant);
+
+        assertThrows(UnauthorizedAccessException.class, () ->
+                orderService.getTenantOrders("nike", adidasAdmin));
+
+        verify(orderRepository, never()).findByTenantIdOrderByOrderDateDesc(anyLong());
+    }
+
+    @Test
+    void testGetTenantOrders_PlatformAdmin_ReturnsOrders() {
+        User platformAdmin = User.builder()
+                .id(1L)
+                .username("admin")
+                .role(Role.ADMIN)
+                .build();
+
+        Order savedOrder = Order.builder()
+                .id(500L)
+                .user(customer)
+                .tenant(nikeTenant)
+                .orderDate(LocalDateTime.now())
+                .totalQuantity(2)
+                .totalAmount(BigDecimal.valueOf(200.0))
+                .status(OrderStatus.COMPLETED)
+                .items(Collections.emptyList())
+                .build();
+
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        doNothing().when(productService).validateTenantAccess(platformAdmin, nikeTenant);
+        when(orderRepository.findByTenantIdOrderByOrderDateDesc(1L))
+                .thenReturn(Collections.singletonList(savedOrder));
+
+        var orders = orderService.getTenantOrders("nike", platformAdmin);
+
+        assertNotNull(orders);
+        assertEquals(1, orders.size());
+        verify(productService, times(1)).validateTenantAccess(platformAdmin, nikeTenant);
     }
 }

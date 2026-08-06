@@ -30,12 +30,14 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final TenantService tenantService;
+    private final ProductService productService;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, TenantService tenantService) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, TenantService tenantService, ProductService productService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.tenantService = tenantService;
+        this.productService = productService;
     }
 
     @Transactional
@@ -162,6 +164,9 @@ public class OrderService {
 
 
         Tenant tenant = tenantService.getTenantEntityBySlug(tenantSlug);
+
+        productService.validateTenantAccess(currentUser, tenant);
+
         return orderRepository.findByTenantIdOrderByOrderDateDesc(tenant.getId()).stream()
                 .map(this::mapToResponse)
                 .toList();
