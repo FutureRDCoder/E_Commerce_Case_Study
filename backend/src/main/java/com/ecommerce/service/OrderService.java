@@ -84,6 +84,8 @@ public class OrderService {
                     itemRequest.getProductId()
             );
 
+            ensureProductActive(product);
+
             validateStock(product, itemRequest.getQuantity());
 
             reduceStock(product, itemRequest.getQuantity());
@@ -305,6 +307,14 @@ public class OrderService {
                                         + " not found under brand "
                                         + tenantSlug
                         ));
+    }
+
+    private void ensureProductActive(Product product) {
+        if (!product.isActive()) {
+            throw new ResourceNotFoundException(
+                    "Product not found with id: " + product.getId()
+            );
+        }
     }
 
     private void validateStock(

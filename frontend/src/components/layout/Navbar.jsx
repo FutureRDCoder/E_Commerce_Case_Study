@@ -79,9 +79,11 @@ function Navbar() {
                         <>
                             <NotificationBell />
 
-                            <Link to="/favourites" aria-label="Favourites">
-                                <Heart className="h-5 w-5 cursor-pointer text-slate-400 transition-colors hover:text-pink-500" />
-                            </Link>
+                            {user?.role !== 'ADMIN' && (
+                                <Link to="/favourites" aria-label="Favourites">
+                                    <Heart className="h-5 w-5 cursor-pointer text-slate-400 transition-colors hover:text-pink-500" />
+                                </Link>
+                            )}
 
                             {user?.role !== 'ADMIN' && (
                                 <Link to="/cart" aria-label="Cart">
@@ -94,6 +96,15 @@ function Navbar() {
                                             </span>
                                         )}
                                     </span>
+                                </Link>
+                            )}
+
+                            {(user?.role === 'USER' || user?.role === 'TENANT_ADMIN') && (
+                                <Link
+                                    to="/orders"
+                                    className="btn-secondary px-4 py-2 text-sm"
+                                >
+                                    Orders
                                 </Link>
                             )}
 
@@ -199,13 +210,15 @@ function Navbar() {
 
                         {isAuthenticated ? (
                             <>
-                                <NavLink
-                                    to="/favourites"
-                                    className={navLinkClass}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Favourites
-                                </NavLink>
+                                {user?.role !== 'ADMIN' && (
+                                    <NavLink
+                                        to="/favourites"
+                                        className={navLinkClass}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Favourites
+                                    </NavLink>
+                                )}
 
                                 {user?.role !== 'ADMIN' && (
                                     <>

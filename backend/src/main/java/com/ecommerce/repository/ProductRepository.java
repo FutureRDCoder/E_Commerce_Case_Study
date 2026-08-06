@@ -35,7 +35,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("""
             SELECT p FROM Product p
-            WHERE (:tenantId IS NULL OR p.tenant.id = :tenantId)
+            WHERE p.active = TRUE
+              AND (:tenantId IS NULL OR p.tenant.id = :tenantId)
               AND (:category IS NULL OR LOWER(p.category) = LOWER(:category))
               AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
               AND (:minPrice IS NULL OR p.price >= :minPrice)

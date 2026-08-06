@@ -6,12 +6,16 @@ import { useProduct } from "../hooks/useProduct";
 import AddToCartButton from "../components/product/AddToCartButton";
 import FavouriteButton from "../components/product/FavouriteButton";
 
+import useAuthStore from "../store/authStore";
+
 function ProductDetailsPage() {
 
     const {
         tenantSlug,
         productId,
     } = useParams();
+
+    const user = useAuthStore((state) => state.user);
 
     const [quantity, setQuantity] = useState(1);
 
@@ -118,11 +122,13 @@ function ProductDetailsPage() {
 
                 </div>
 
-                <FavouriteButton
-                    tenantSlug={tenantSlug}
-                    product={product}
-                    variant="button"
-                />
+                {user?.role !== 'ADMIN' && (
+                    <FavouriteButton
+                        tenantSlug={tenantSlug}
+                        product={product}
+                        variant="button"
+                    />
+                )}
 
             </div>
 

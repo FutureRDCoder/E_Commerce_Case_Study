@@ -20,8 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import com.ecommerce.repository.OrderItemRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -33,14 +31,12 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final TenantService tenantService;
     private final FavouriteProductRepository favouriteProductRepository;
-    private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
 
-    public ProductService(ProductRepository productRepository, TenantService tenantService, FavouriteProductRepository favouriteProductRepository, OrderItemRepository orderItemRepository, CartItemRepository cartItemRepository) {
+    public ProductService(ProductRepository productRepository, TenantService tenantService, FavouriteProductRepository favouriteProductRepository, CartItemRepository cartItemRepository) {
         this.productRepository = productRepository;
         this.tenantService = tenantService;
         this.favouriteProductRepository = favouriteProductRepository;
-        this.orderItemRepository = orderItemRepository;
         this.cartItemRepository = cartItemRepository;
     }
 
@@ -91,6 +87,8 @@ public class ProductService {
         Product product = productRepository.findByIdAndTenantId(productId, tenant.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId + " under tenant: " + tenantSlug));
 
+        ensureProductActive(product);
+
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -123,6 +121,8 @@ public class ProductService {
         Product product = productRepository.findByIdAndTenantId(productId, tenant.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId + " under tenant: " + tenantSlug));
 
+        ensureProductActive(product);
+
         product.setAvailableQuantity(request.getAvailableQuantity());
         Product updated = productRepository.save(product);
 
@@ -150,13 +150,14 @@ public class ProductService {
         Product product = productRepository.findByIdAndTenantId(productId, tenant.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId + " under tenant: " + tenantSlug));
 
-        favouriteProductRepository.deleteByProductId(productId);
-        orderItemRepository.deleteByProductId(productId);
+        // Soft-delete the product so it disappears from the storefront while
+        // keeping historical orders and favourites intact forever
         cartItemRepository.deleteByProductId(productId);
-        productRepository.delete(product);
+        product.setActive(false);
+        productRepository.save(product);
 
         log.info(
-                "Product '{}' deleted successfully.",
+                "Product '{}' deactivated successfully.",
                 productId
         );
     }
@@ -249,6 +250,9 @@ public class ProductService {
         Tenant tenant = tenantService.getTenantEntityBySlug(tenantSlug);
         Product product = productRepository.findByIdAndTenantId(productId, tenant.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId + " under tenant: " + tenantSlug));
+
+        ensureProductActive(product);
+
         return mapToResponse(product, currentUser);
     }
 
@@ -280,6 +284,14 @@ public class ProductService {
 
     private String normalize(String value) {
         return (value == null || value.isBlank()) ? null : value.trim();
+    }
+
+    private void ensureProductActive(Product product) {
+        if (!product.isActive()) {
+            throw new ResourceNotFoundException(
+                    "Product not found with id: " + product.getId()
+            );
+        }
     }
 
     private void validatePriceRange(BigDecimal minPrice, BigDecimal maxPrice) {

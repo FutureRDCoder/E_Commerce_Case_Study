@@ -52,9 +52,12 @@ public class Product {
 
     private String imageUrl;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     public Product() {}
 
-    public Product(Long id, Tenant tenant, String name, String description, BigDecimal price, String category, Integer availableQuantity, String imageUrl) {
+    public Product(Long id, Tenant tenant, String name, String description, BigDecimal price, String category, Integer availableQuantity, String imageUrl, boolean active) {
         this.id = id;
         this.tenant = tenant;
         this.name = name;
@@ -63,6 +66,7 @@ public class Product {
         this.category = category;
         this.availableQuantity = availableQuantity;
         this.imageUrl = imageUrl;
+        this.active = active;
     }
 
     public Long getId() { return id; }
@@ -89,6 +93,9 @@ public class Product {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
@@ -100,6 +107,7 @@ public class Product {
         private String category;
         private Integer availableQuantity;
         private String imageUrl;
+        private boolean active = true;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder tenant(Tenant tenant) { this.tenant = tenant; return this; }
@@ -109,9 +117,10 @@ public class Product {
         public Builder category(String category) { this.category = category; return this; }
         public Builder availableQuantity(Integer availableQuantity) { this.availableQuantity = availableQuantity; return this; }
         public Builder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
+        public Builder active(boolean active) { this.active = active; return this; }
 
         public Product build() {
-            return new Product(id, tenant, name, description, price, category, availableQuantity, imageUrl);
+            return new Product(id, tenant, name, description, price, category, availableQuantity, imageUrl, active);
         }
     }
 }

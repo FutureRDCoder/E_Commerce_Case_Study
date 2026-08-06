@@ -263,12 +263,20 @@ public class CartService {
             String tenantSlug,
             Long productId
     ) {
-        return productRepository.findByIdAndTenantId(productId, tenant.getId())
+        Product product = productRepository.findByIdAndTenantId(productId, tenant.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Product with id " + productId
                                         + " not found under brand " + tenantSlug
                         ));
+
+        if (!product.isActive()) {
+            throw new ResourceNotFoundException(
+                    "Product not found with id: " + productId
+            );
+        }
+
+        return product;
     }
 
     private void validateStock(Product product, Integer requestedQuantity) {

@@ -5,12 +5,9 @@ import com.ecommerce.dto.response.TenantResponse;
 import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.model.Tenant;
-import com.ecommerce.model.Order;
 import com.ecommerce.model.Product;
 import com.ecommerce.model.User;
-import com.ecommerce.repository.FavouriteProductRepository;
-import com.ecommerce.repository.OrderItemRepository;
-import com.ecommerce.repository.OrderRepository;
+import com.ecommerce.repository.CartItemRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.repository.TenantRepository;
 import com.ecommerce.repository.UserRepository;
@@ -30,23 +27,17 @@ public class TenantService {
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
-    private final FavouriteProductRepository favouriteProductRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final CartItemRepository cartItemRepository;
 
     public TenantService(
             TenantRepository tenantRepository,
             UserRepository userRepository,
             ProductRepository productRepository,
-            OrderRepository orderRepository,
-            FavouriteProductRepository favouriteProductRepository,
-            OrderItemRepository orderItemRepository) {
+            CartItemRepository cartItemRepository) {
         this.tenantRepository = tenantRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
-        this.orderRepository = orderRepository;
-        this.favouriteProductRepository = favouriteProductRepository;
-        this.orderItemRepository = orderItemRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     public TenantResponse createTenant(TenantRequest request) {
@@ -131,10 +122,10 @@ public class TenantService {
     @Transactional(readOnly = true)
     public Page<TenantResponse> getAllTenants(Pageable pageable) {
 
-        log.info("Fetching all tenants.");
+        log.info("Fetching all active tenants.");
 
         return tenantRepository
-                .findAll(pageable)
+                .findByActiveTrue(pageable)
                 .map(this::mapToResponse);
     }
 
@@ -146,7 +137,7 @@ public class TenantService {
                 slug
         );
 
-        Tenant tenant = tenantRepository.findBySlugIgnoreCase(slug)
+        Tenant tenant = tenantRepository.findBySlugIgnoreCaseAndActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant not found with slug: " + slug));
         return mapToResponse(tenant);
     }
@@ -169,30 +160,28 @@ public class TenantService {
             userRepository.save(user);
         }
 
-        // 2. Delete tenant orders
-        List<Order> orders = orderRepository.findByTenantIdOrderByOrderDateDesc(id);
-        orderRepository.deleteAll(orders);
-
-        // 3. Delete tenant products and their favourite / order item references
+        // 2. Deactivate the tenant's products (orders and favourites are preserved forever)
         List<Product> products = productRepository.findByTenantId(id);
         for (Product product : products) {
-            favouriteProductRepository.deleteByProductId(product.getId());
-            orderItemRepository.deleteByProductId(product.getId());
+            cartItemRepository.deleteByProductId(product.getId());
+            product.setActive(false);
+            productRepository.save(product);
         }
-        productRepository.deleteAll(products);
 
-        // 4. Delete tenant entity
-        tenantRepository.delete(tenant);
+        // 3. Deactivate the tenant instead of deleting it so historical
+        //    orders and favourites remain visible forever
+        tenant.setActive(false);
+        tenantRepository.save(tenant);
 
         log.info(
-                "Tenant '{}' deleted successfully.",
+                "Tenant '{}' deactivated successfully.",
                 id
         );
     }
 
     @Transactional(readOnly = true)
     public Tenant getTenantEntityBySlug(String slug) {
-        return tenantRepository.findBySlugIgnoreCase(slug)
+        return tenantRepository.findBySlugIgnoreCaseAndActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant brand not found: " + slug));
     }
 

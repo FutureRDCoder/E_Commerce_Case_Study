@@ -3,6 +3,7 @@ package com.ecommerce.service;
 import com.ecommerce.dto.response.ProductResponse;
 import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.exception.ResourceNotFoundException;
+import com.ecommerce.exception.UnauthorizedAccessException;
 import com.ecommerce.model.FavouriteProduct;
 import com.ecommerce.model.Product;
 import com.ecommerce.model.Role;
@@ -137,5 +138,51 @@ public class FavouriteServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () ->
                 favouriteService.addFavourite("nike", 999L, customer));
+    }
+
+    @Test
+    void testAddFavourite_InactiveProduct_ThrowsException() {
+        nikeShoe.setActive(false);
+
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        when(productRepository.findByIdAndTenantId(101L, 1L)).thenReturn(Optional.of(nikeShoe));
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                favouriteService.addFavourite("nike", 101L, customer));
+    }
+
+    @Test
+    void testAddFavourite_AdminRole_ThrowsException() {
+        User admin = User.builder()
+                .id(9L)
+                .username("adminuser")
+                .role(Role.ADMIN)
+                .build();
+
+        assertThrows(UnauthorizedAccessException.class, () ->
+                favouriteService.addFavourite("nike", 101L, admin));
+
+        verify(favouriteProductRepository, never()).save(any());
+    }
+
+    @Test
+    void testRemoveFavourite_Success_WorksForDeletedProducts() {
+        favouriteService.removeFavourite("nike", 101L, customer);
+
+        verify(favouriteProductRepository, times(1))
+                .deleteByUserIdAndProductId(5L, 101L);
+        verify(tenantService, never()).getTenantEntityBySlug(anyString());
+    }
+
+    @Test
+    void testGetUserFavourites_AdminRole_ThrowsException() {
+        User admin = User.builder()
+                .id(9L)
+                .username("adminuser")
+                .role(Role.ADMIN)
+                .build();
+
+        assertThrows(UnauthorizedAccessException.class, () ->
+                favouriteService.getUserFavourites("global", admin));
     }
 }

@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 
 import AddToCartButton from "./AddToCartButton";
 import FavouriteButton from "./FavouriteButton";
+import useAuthStore from "../../store/authStore";
 
 function ProductCard({ product }) {
+
+  const user = useAuthStore((state) => state.user);
 
   return (
 
@@ -40,10 +43,12 @@ function ProductCard({ product }) {
             {product.name}
           </h2>
 
-          <FavouriteButton
-            tenantSlug={product.tenantSlug}
-            product={product}
-          />
+          {user?.role !== 'ADMIN' && (
+            <FavouriteButton
+              tenantSlug={product.tenantSlug}
+              product={product}
+            />
+          )}
 
         </div>
 

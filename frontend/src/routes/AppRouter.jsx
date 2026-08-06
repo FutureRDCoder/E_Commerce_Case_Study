@@ -6,6 +6,7 @@ import TenantDashboardLayout from "../layouts/TenantDashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import TenantAdminRoute from "./TenantAdminRoute";
+import CustomerRoute from "./CustomerRoute";
 import GuestRoute from "./GuestRoute";
 
 import LoginPage from "../pages/LoginPage";
@@ -76,16 +77,20 @@ function AppRouter() {
 
           <Route path="/orders" element={<OrdersPage />} />
 
-          <Route path="/favourites" element={<FavouritesPage />} />
+          <Route element={<CustomerRoute />}>
+
+            <Route path="/favourites" element={<FavouritesPage />} />
+
+            <Route
+              path="/:tenantSlug/favourites"
+              element={<FavouritesPage />}
+            />
+
+          </Route>
 
           <Route path="/:tenantSlug/cart" element={<CartPage />} />
 
           <Route path="/:tenantSlug/orders" element={<OrdersPage />} />
-
-          <Route
-            path="/:tenantSlug/favourites"
-            element={<FavouritesPage />}
-          />
 
         </Route>
 

@@ -21,14 +21,18 @@ public class Tenant {
 
     private String logoUrl;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     public Tenant() {}
 
-    public Tenant(Long id, String name, String slug, String description, String logoUrl) {
+    public Tenant(Long id, String name, String slug, String description, String logoUrl, boolean active) {
         this.id = id;
         this.name = name;
         this.slug = slug;
         this.description = description;
         this.logoUrl = logoUrl;
+        this.active = active;
     }
 
     public Long getId() { return id; }
@@ -46,6 +50,9 @@ public class Tenant {
     public String getLogoUrl() { return logoUrl; }
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
 
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
@@ -54,15 +61,17 @@ public class Tenant {
         private String slug;
         private String description;
         private String logoUrl;
+        private boolean active = true;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder name(String name) { this.name = name; return this; }
         public Builder slug(String slug) { this.slug = slug; return this; }
         public Builder description(String description) { this.description = description; return this; }
         public Builder logoUrl(String logoUrl) { this.logoUrl = logoUrl; return this; }
+        public Builder active(boolean active) { this.active = active; return this; }
 
         public Tenant build() {
-            return new Tenant(id, name, slug, description, logoUrl);
+            return new Tenant(id, name, slug, description, logoUrl, active);
         }
     }
 }

@@ -5,11 +5,13 @@ import com.ecommerce.dto.request.ProductSearchRequest;
 import com.ecommerce.dto.response.ProductResponse;
 import com.ecommerce.dto.request.StockUpdateRequest;
 import com.ecommerce.exception.BadRequestException;
+import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.exception.UnauthorizedAccessException;
 import com.ecommerce.model.Product;
 import com.ecommerce.model.Role;
 import com.ecommerce.model.Tenant;
 import com.ecommerce.model.User;
+import com.ecommerce.repository.CartItemRepository;
 import com.ecommerce.repository.FavouriteProductRepository;
 import com.ecommerce.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
@@ -41,6 +44,9 @@ public class ProductServiceTest {
 
     @Mock
     private FavouriteProductRepository favouriteProductRepository;
+
+    @Mock
+    private CartItemRepository cartItemRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -152,6 +158,32 @@ public class ProductServiceTest {
                 productService.deleteProduct("nike", 100L, adidasAdminUser));
 
         verify(productRepository, never()).delete(any(Product.class));
+    }
+
+    @Test
+    void testDeleteProduct_Success_DeactivatesWithoutDeletingFavouritesOrOrders() {
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        when(productRepository.findByIdAndTenantId(100L, 1L)).thenReturn(Optional.of(nikeProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(nikeProduct);
+
+        productService.deleteProduct("nike", 100L, nikeAdminUser);
+
+        assertFalse(nikeProduct.isActive());
+        verify(productRepository, times(1)).save(nikeProduct);
+        verify(productRepository, never()).delete(any(Product.class));
+        verify(cartItemRepository, times(1)).deleteByProductId(100L);
+        verify(favouriteProductRepository, never()).deleteByProductId(anyLong());
+    }
+
+    @Test
+    void testGetProductById_InactiveProduct_ThrowsNotFound() {
+        nikeProduct.setActive(false);
+
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        when(productRepository.findByIdAndTenantId(100L, 1L)).thenReturn(Optional.of(nikeProduct));
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                productService.getProductById("nike", 100L, null));
     }
 
     @Test

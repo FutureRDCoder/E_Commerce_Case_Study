@@ -3,8 +3,10 @@ package com.ecommerce.service;
 import com.ecommerce.dto.response.ProductResponse;
 import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.exception.ResourceNotFoundException;
+import com.ecommerce.exception.UnauthorizedAccessException;
 import com.ecommerce.model.FavouriteProduct;
 import com.ecommerce.model.Product;
+import com.ecommerce.model.Role;
 import com.ecommerce.model.Tenant;
 import com.ecommerce.model.User;
 import com.ecommerce.repository.FavouriteProductRepository;
@@ -45,7 +47,15 @@ public class FavouriteService {
         log.info("User '{}' is adding product '{}' to favourites for tenant '{}'.",
                 currentUser.getUsername(), productId, tenantSlug);
 
+        ensureNotAdmin(currentUser);
+
         Product product = getTenantProduct(tenantSlug, productId);
+
+        if (!product.isActive()) {
+            throw new ResourceNotFoundException(
+                    "Product not found with id: " + productId
+            );
+        }
 
         if (favouriteProductRepository.existsByUserIdAndProductId(
                 currentUser.getId(),
@@ -84,15 +94,15 @@ public class FavouriteService {
         log.info("User '{}' is removing product '{}' from favourites for tenant '{}'.",
                 currentUser.getUsername(), productId, tenantSlug);
 
-        Product product = getTenantProduct(tenantSlug, productId);
+        ensureNotAdmin(currentUser);
 
         favouriteProductRepository.deleteByUserIdAndProductId(
                 currentUser.getId(),
-                product.getId()
+                productId
         );
 
         log.info("Product '{}' removed from favourites for user '{}'.",
-                product.getName(), currentUser.getUsername());
+                productId, currentUser.getUsername());
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +113,8 @@ public class FavouriteService {
 
         log.debug("Fetching favourites for user '{}' under tenant '{}'.",
                 currentUser.getUsername(), tenantSlug);
+
+        ensureNotAdmin(currentUser);
 
         List<FavouriteProduct> favourites;
 
@@ -131,6 +143,14 @@ public class FavouriteService {
                 favouriteProducts.size(), currentUser.getUsername());
 
         return favouriteProducts;
+    }
+
+    private void ensureNotAdmin(User currentUser) {
+        if (currentUser.getRole() == Role.ADMIN) {
+            throw new UnauthorizedAccessException(
+                    "Admin accounts are not allowed to use favourites."
+            );
+        }
     }
 
     private Product getTenantProduct(String tenantSlug, Long productId) {

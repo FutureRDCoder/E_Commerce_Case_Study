@@ -4,6 +4,7 @@ import com.ecommerce.dto.response.ProductResponse;
 import com.ecommerce.model.User;
 import com.ecommerce.service.FavouriteService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/{tenantSlug}/favourites")
+@PreAuthorize("hasAnyRole('USER', 'TENANT_ADMIN')")
 public class MultiTenantFavouriteController {
 
     private final FavouriteService favouriteService;
