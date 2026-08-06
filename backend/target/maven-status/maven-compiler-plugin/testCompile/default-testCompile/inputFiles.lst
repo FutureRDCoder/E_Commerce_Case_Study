@@ -1,6 +1,8 @@
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\security\SecurityConfigTest.java
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\service\AuthServiceTest.java
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\service\OrderServiceTest.java
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\service\ProductServiceTest.java
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\service\TenantServiceTest.java
-C:\Users\pande\OneDrive\Desktop\Ecommerce\backend\src\test\java\com\ecommerce\service\UserIdentityServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/AuthServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/CartServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/FavouriteServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/OrderServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/PlatformUserServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/ProductServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/TenantServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/UserIdentityServiceTest.java

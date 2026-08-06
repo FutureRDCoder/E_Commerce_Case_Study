@@ -19,10 +19,15 @@ public class UserIdentityService {
 
     private final UserRepository userRepository;
     private final TenantRepository tenantRepository;
+    private final KeycloakAdminService keycloakAdminService;
 
-    public UserIdentityService(UserRepository userRepository, TenantRepository tenantRepository) {
+    public UserIdentityService(
+            UserRepository userRepository,
+            TenantRepository tenantRepository,
+            KeycloakAdminService keycloakAdminService) {
         this.userRepository = userRepository;
         this.tenantRepository = tenantRepository;
+        this.keycloakAdminService = keycloakAdminService;
     }
 
     @Transactional
@@ -34,7 +39,7 @@ public class UserIdentityService {
 
         User existing = findExistingUser(keycloakUserId, username, email);
         Role mappedRole = extractRole(jwt);
-        Tenant tenant = resolveTenant(jwt, mappedRole);
+        Tenant tenant = resolveTenant(jwt, mappedRole, existing, username);
 
         if (existing != null) {
             existing.setKeycloakUserId(keycloakUserId);
@@ -92,10 +97,20 @@ public class UserIdentityService {
         return null;
     }
 
-    private Tenant resolveTenant(Jwt jwt, Role role) {
+    private Tenant resolveTenant(
+            Jwt jwt,
+            Role role,
+            User existing,
+            String username) {
         String tenantSlug = trimToNull(jwt.getClaimAsString("tenantSlug"));
         if (tenantSlug == null) {
             tenantSlug = trimToNull(jwt.getClaimAsString("tenant"));
+        }
+        if (tenantSlug == null && existing != null && existing.getTenant() != null) {
+            tenantSlug = existing.getTenant().getSlug();
+        }
+        if (tenantSlug == null && role == Role.TENANT_ADMIN) {
+            tenantSlug = keycloakAdminService.findTenantSlugByUsername(username);
         }
         if (tenantSlug == null) {
             if (role == Role.TENANT_ADMIN) {

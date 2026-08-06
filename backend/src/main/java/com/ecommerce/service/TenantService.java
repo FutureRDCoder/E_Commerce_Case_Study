@@ -1,7 +1,7 @@
 package com.ecommerce.service;
 
-import com.ecommerce.dto.TenantRequest;
-import com.ecommerce.dto.TenantResponse;
+import com.ecommerce.dto.request.TenantRequest;
+import com.ecommerce.dto.response.TenantResponse;
 import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.model.Tenant;
@@ -14,12 +14,16 @@ import com.ecommerce.repository.OrderRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.repository.TenantRepository;
 import com.ecommerce.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TenantService {
 
@@ -46,6 +50,12 @@ public class TenantService {
     }
 
     public TenantResponse createTenant(TenantRequest request) {
+
+        log.info(
+                "Creating tenant '{}'.",
+                request.getName()
+        );
+
         String slug = request.getSlug().toLowerCase().trim();
         if (tenantRepository.existsBySlugIgnoreCase(slug)) {
             throw new BadRequestException("Tenant slug already exists: " + slug);
@@ -62,16 +72,80 @@ public class TenantService {
                 .build();
 
         Tenant saved = tenantRepository.save(tenant);
+
+        log.info(
+                "Tenant '{}' created successfully.",
+                saved.getId()
+        );
+
         return mapToResponse(saved);
     }
 
-    public List<TenantResponse> getAllTenants() {
-        return tenantRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    @Transactional
+    public TenantResponse updateTenant(Long id, TenantRequest request) {
+
+        log.info(
+                "Updating tenant '{}'.",
+                id
+        );
+
+        Tenant tenant = tenantRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Tenant not found with id: " + id
+                        ));
+
+        String slug = request.getSlug().trim().toLowerCase();
+
+        tenantRepository.findBySlugIgnoreCase(slug)
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new BadRequestException(
+                            "Tenant slug already exists: " + slug
+                    );
+                });
+
+        tenantRepository.findByNameIgnoreCase(request.getName())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new BadRequestException(
+                            "Tenant name already exists: " + request.getName()
+                    );
+                });
+
+        tenant.setName(request.getName());
+        tenant.setSlug(slug);
+        tenant.setDescription(request.getDescription());
+        tenant.setLogoUrl(request.getLogoUrl());
+
+        Tenant updated = tenantRepository.save(tenant);
+
+        log.info(
+                "Tenant '{}' updated successfully.",
+                updated.getId()
+        );
+
+        return mapToResponse(updated);
     }
 
+    @Transactional(readOnly = true)
+    public Page<TenantResponse> getAllTenants(Pageable pageable) {
+
+        log.info("Fetching all tenants.");
+
+        return tenantRepository
+                .findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Transactional(readOnly = true)
     public TenantResponse getTenantBySlug(String slug) {
+
+        log.info(
+                "Fetching tenant '{}'.",
+                slug
+        );
+
         Tenant tenant = tenantRepository.findBySlugIgnoreCase(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant not found with slug: " + slug));
         return mapToResponse(tenant);
@@ -79,6 +153,12 @@ public class TenantService {
 
     @Transactional
     public void deleteTenant(Long id) {
+
+        log.info(
+                "Deleting tenant '{}'.",
+                id
+        );
+
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant not found with id: " + id));
 
@@ -103,14 +183,27 @@ public class TenantService {
 
         // 4. Delete tenant entity
         tenantRepository.delete(tenant);
+
+        log.info(
+                "Tenant '{}' deleted successfully.",
+                id
+        );
     }
 
+    @Transactional(readOnly = true)
     public Tenant getTenantEntityBySlug(String slug) {
         return tenantRepository.findBySlugIgnoreCase(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant brand not found: " + slug));
     }
 
+    @Transactional(readOnly = true)
     private TenantResponse mapToResponse(Tenant tenant) {
+
+        log.debug(
+                "Mapping tenant '{}' to response.",
+                tenant.getId()
+        );
+
         return TenantResponse.builder()
                 .id(tenant.getId())
                 .name(tenant.getName())

@@ -1,7 +1,8 @@
-package com.ecommerce.dto;
+package com.ecommerce.dto.response;
 
 import com.ecommerce.model.OrderStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,13 +17,13 @@ public class OrderResponse {
     private String tenantSlug;
     private LocalDateTime orderDate;
     private Integer totalQuantity;
-    private Double totalAmount;
+    private BigDecimal totalAmount;
     private OrderStatus status;
     private List<OrderItemResponse> items;
 
     public OrderResponse() {}
 
-    public OrderResponse(Long id, Long userId, String username, String userFullName, Long tenantId, String tenantName, String tenantSlug, LocalDateTime orderDate, Integer totalQuantity, Double totalAmount, OrderStatus status, List<OrderItemResponse> items) {
+    public OrderResponse(Long id, Long userId, String username, String userFullName, Long tenantId, String tenantName, String tenantSlug, LocalDateTime orderDate, Integer totalQuantity, BigDecimal totalAmount, OrderStatus status, List<OrderItemResponse> items) {
         this.id = id;
         this.userId = userId;
         this.username = username;
@@ -64,8 +65,8 @@ public class OrderResponse {
     public Integer getTotalQuantity() { return totalQuantity; }
     public void setTotalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; }
 
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
@@ -85,7 +86,7 @@ public class OrderResponse {
         private String tenantSlug;
         private LocalDateTime orderDate;
         private Integer totalQuantity;
-        private Double totalAmount;
+        private BigDecimal totalAmount;
         private OrderStatus status;
         private List<OrderItemResponse> items;
 
@@ -98,7 +99,7 @@ public class OrderResponse {
         public Builder tenantSlug(String tenantSlug) { this.tenantSlug = tenantSlug; return this; }
         public Builder orderDate(LocalDateTime orderDate) { this.orderDate = orderDate; return this; }
         public Builder totalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; return this; }
-        public Builder totalAmount(Double totalAmount) { this.totalAmount = totalAmount; return this; }
+        public Builder totalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; return this; }
         public Builder status(OrderStatus status) { this.status = status; return this; }
         public Builder items(List<OrderItemResponse> items) { this.items = items; return this; }
 

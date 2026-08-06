@@ -1,8 +1,9 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dto.ProductRequest;
-import com.ecommerce.dto.ProductResponse;
-import com.ecommerce.dto.StockUpdateRequest;
+import com.ecommerce.dto.request.ProductRequest;
+import com.ecommerce.dto.request.ProductSearchRequest;
+import com.ecommerce.dto.response.ProductResponse;
+import com.ecommerce.dto.request.StockUpdateRequest;
 import com.ecommerce.model.User;
 import com.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
@@ -26,12 +27,9 @@ public class MultiTenantProductController {
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getProducts(
             @PathVariable String tenantSlug,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Valid ProductSearchRequest request,
             @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(productService.getProducts(tenantSlug, category, search, page, size, currentUser));
+        return ResponseEntity.ok(productService.getProducts(tenantSlug, request, currentUser));
     }
 
     @GetMapping("/{id}")

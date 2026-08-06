@@ -1,6 +1,6 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dto.ProductResponse;
+import com.ecommerce.dto.response.ProductResponse;
 import com.ecommerce.model.User;
 import com.ecommerce.service.FavouriteService;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,15 @@ public class MultiTenantFavouriteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getUserFavourites(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(favouriteService.getUserFavourites(currentUser));
+    public ResponseEntity<List<ProductResponse>> getUserFavourites(
+            @PathVariable String tenantSlug,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return ResponseEntity.ok(
+                favouriteService.getUserFavourites(
+                        tenantSlug,
+                        currentUser
+                )
+        );
     }
 }

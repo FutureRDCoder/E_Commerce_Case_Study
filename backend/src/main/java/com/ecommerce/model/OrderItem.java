@@ -3,8 +3,24 @@ package com.ecommerce.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "order_items")
+@Table(
+        name = "order_items",
+        indexes = {
+
+                @Index(
+                        name = "idx_order_item_order",
+                        columnList = "order_id"
+                ),
+
+                @Index(
+                        name = "idx_order_item_product",
+                        columnList = "product_id"
+                )
+        }
+)
 public class OrderItem {
 
     @Id
@@ -16,7 +32,7 @@ public class OrderItem {
     @JsonIgnore
     private Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
@@ -24,14 +40,14 @@ public class OrderItem {
     private Integer quantity;
 
     @Column(nullable = false)
-    private Double unitPrice;
+    private BigDecimal unitPrice;
 
     @Column(nullable = false)
-    private Double subtotal;
+    private BigDecimal subtotal;
 
     public OrderItem() {}
 
-    public OrderItem(Long id, Order order, Product product, Integer quantity, Double unitPrice, Double subtotal) {
+    public OrderItem(Long id, Order order, Product product, Integer quantity, BigDecimal unitPrice, BigDecimal subtotal) {
         this.id = id;
         this.order = order;
         this.product = product;
@@ -52,11 +68,11 @@ public class OrderItem {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public Double getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(Double unitPrice) { this.unitPrice = unitPrice; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
 
-    public Double getSubtotal() { return subtotal; }
-    public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -65,15 +81,15 @@ public class OrderItem {
         private Order order;
         private Product product;
         private Integer quantity;
-        private Double unitPrice;
-        private Double subtotal;
+        private BigDecimal unitPrice;
+        private BigDecimal subtotal;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder order(Order order) { this.order = order; return this; }
         public Builder product(Product product) { this.product = product; return this; }
         public Builder quantity(Integer quantity) { this.quantity = quantity; return this; }
-        public Builder unitPrice(Double unitPrice) { this.unitPrice = unitPrice; return this; }
-        public Builder subtotal(Double subtotal) { this.subtotal = subtotal; return this; }
+        public Builder unitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; return this; }
+        public Builder subtotal(BigDecimal subtotal) { this.subtotal = subtotal; return this; }
 
         public OrderItem build() {
             return new OrderItem(id, order, product, quantity, unitPrice, subtotal);

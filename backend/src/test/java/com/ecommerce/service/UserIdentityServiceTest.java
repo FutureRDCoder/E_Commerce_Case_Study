@@ -30,6 +30,9 @@ class UserIdentityServiceTest {
     @Mock
     private TenantRepository tenantRepository;
 
+    @Mock
+    private KeycloakAdminService keycloakAdminService;
+
     @InjectMocks
     private UserIdentityService userIdentityService;
 

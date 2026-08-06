@@ -1,6 +1,9 @@
 package com.ecommerce.repository;
 
+import com.ecommerce.model.Role;
 import com.ecommerce.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     List<User> findByTenantId(Long tenantId);
+
+    Page<User> findByRole(Role role, Pageable pageable);
 }

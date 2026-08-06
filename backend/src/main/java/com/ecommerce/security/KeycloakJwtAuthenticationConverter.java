@@ -12,11 +12,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class KeycloakJwtAuthenticationConverter
+        implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final UserIdentityService userIdentityService;
 
-    public KeycloakJwtAuthenticationConverter(UserIdentityService userIdentityService) {
+    public KeycloakJwtAuthenticationConverter(
+            UserIdentityService userIdentityService) {
         this.userIdentityService = userIdentityService;
     }
 
@@ -26,7 +28,11 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
         return new UsernamePasswordAuthenticationToken(
                 user,
                 "N/A",
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                List.of(
+                        new SimpleGrantedAuthority(
+                                "ROLE_" + user.getRole().name()
+                        )
+                )
         );
     }
 }

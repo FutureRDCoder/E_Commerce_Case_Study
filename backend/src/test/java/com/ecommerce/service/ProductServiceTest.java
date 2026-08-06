@@ -1,8 +1,10 @@
 package com.ecommerce.service;
 
-import com.ecommerce.dto.ProductRequest;
-import com.ecommerce.dto.ProductResponse;
-import com.ecommerce.dto.StockUpdateRequest;
+import com.ecommerce.dto.request.ProductRequest;
+import com.ecommerce.dto.request.ProductSearchRequest;
+import com.ecommerce.dto.response.ProductResponse;
+import com.ecommerce.dto.request.StockUpdateRequest;
+import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.exception.UnauthorizedAccessException;
 import com.ecommerce.model.Product;
 import com.ecommerce.model.Role;
@@ -16,11 +18,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,14 +82,14 @@ public class ProductServiceTest {
                 .id(100L)
                 .tenant(nikeTenant)
                 .name("Air Max")
-                .price(150.0)
+                .price(BigDecimal.valueOf(150.0))
                 .category("Footwear")
                 .availableQuantity(20)
                 .build();
 
         productRequest = ProductRequest.builder()
                 .name("Air Max")
-                .price(150.0)
+                .price(BigDecimal.valueOf(150.0))
                 .category("Footwear")
                 .availableQuantity(20)
                 .build();
@@ -161,5 +168,115 @@ public class ProductServiceTest {
     void testValidateTenantAccess_DifferentTenantAdmin_Throws() {
         assertThrows(UnauthorizedAccessException.class, () ->
                 productService.validateTenantAccess(adidasAdminUser, nikeTenant));
+    }
+
+    @Test
+    void testGetAllProducts_WithCategoryAndPrice_FiltersByPrice() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .category("Footwear")
+                .minPrice(BigDecimal.valueOf(100))
+                .maxPrice(BigDecimal.valueOf(200))
+                .build();
+
+        Page<Product> productPage = new PageImpl<>(List.of(nikeProduct));
+        when(productRepository.searchProducts(
+                isNull(),
+                eq("Footwear"),
+                isNull(),
+                eq(BigDecimal.valueOf(100)),
+                eq(BigDecimal.valueOf(200)),
+                any()
+        )).thenReturn(productPage);
+
+        Page<ProductResponse> response = productService.getAllProducts(request, null);
+
+        assertNotNull(response);
+        assertEquals(1, response.getTotalElements());
+        verify(productRepository).searchProducts(
+                isNull(),
+                eq("Footwear"),
+                isNull(),
+                eq(BigDecimal.valueOf(100)),
+                eq(BigDecimal.valueOf(200)),
+                any()
+        );
+    }
+
+    @Test
+    void testGetAllProducts_OnlyMaxPrice_AppliesUpperBound() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .maxPrice(BigDecimal.valueOf(150))
+                .build();
+
+        Page<Product> productPage = new PageImpl<>(List.of());
+        when(productRepository.searchProducts(
+                isNull(), isNull(), isNull(),
+                isNull(), eq(BigDecimal.valueOf(150)), any()
+        )).thenReturn(productPage);
+
+        productService.getAllProducts(request, null);
+
+        verify(productRepository).searchProducts(
+                isNull(), isNull(), isNull(),
+                isNull(), eq(BigDecimal.valueOf(150)), any()
+        );
+    }
+
+    @Test
+    void testGetProducts_WithPriceFilter_ScopesToTenant() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .minPrice(BigDecimal.valueOf(50))
+                .build();
+
+        Page<Product> productPage = new PageImpl<>(List.of(nikeProduct));
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        when(productRepository.searchProducts(
+                eq(1L), isNull(), isNull(),
+                eq(BigDecimal.valueOf(50)), isNull(), any()
+        )).thenReturn(productPage);
+
+        productService.getProducts("nike", request, null);
+
+        verify(productRepository).searchProducts(
+                eq(1L), isNull(), isNull(),
+                eq(BigDecimal.valueOf(50)), isNull(), any()
+        );
+    }
+
+    @Test
+    void testGetAllProducts_MinGreaterThanMax_ThrowsBadRequest() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .minPrice(BigDecimal.valueOf(500))
+                .maxPrice(BigDecimal.valueOf(100))
+                .build();
+
+        assertThrows(BadRequestException.class, () ->
+                productService.getAllProducts(request, null));
+
+        verify(productRepository, never()).searchProducts(
+                any(), any(), any(), any(), any(), any()
+        );
+    }
+
+    @Test
+    void testGetProducts_CategoryBlank_NormalizesToNull() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .category("  ")
+                .search(" Air ")
+                .build();
+
+        Page<Product> productPage = new PageImpl<>(List.of());
+        when(tenantService.getTenantEntityBySlug("nike")).thenReturn(nikeTenant);
+        when(productRepository.searchProducts(
+                eq(1L), isNull(), eq("Air"),
+                isNull(), isNull(), any()
+        )).thenReturn(productPage);
+
+        productService.getProducts("nike", request, null);
+
+        verify(productRepository).searchProducts(
+                eq(1L), isNull(), eq("Air"),
+                isNull(), isNull(), any()
+        );
     }
 }

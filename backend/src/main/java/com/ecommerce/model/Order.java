@@ -1,23 +1,44 @@
 package com.ecommerce.model;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(
+        name = "orders",
+        indexes = {
+
+                @Index(
+                        name = "idx_order_user",
+                        columnList = "user_id"
+                ),
+
+                @Index(
+                        name = "idx_order_tenant",
+                        columnList = "tenant_id"
+                ),
+
+                @Index(
+                        name = "idx_order_date",
+                        columnList = "order_date"
+                )
+        }
+)
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
@@ -28,7 +49,7 @@ public class Order {
     private Integer totalQuantity;
 
     @Column(nullable = false)
-    private Double totalAmount;
+    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,7 +60,7 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long id, User user, Tenant tenant, LocalDateTime orderDate, Integer totalQuantity, Double totalAmount, OrderStatus status, List<OrderItem> items) {
+    public Order(Long id, User user, Tenant tenant, LocalDateTime orderDate, Integer totalQuantity, BigDecimal totalAmount, OrderStatus status, List<OrderItem> items) {
         this.id = id;
         this.user = user;
         this.tenant = tenant;
@@ -67,14 +88,24 @@ public class Order {
     public Integer getTotalQuantity() { return totalQuantity; }
     public void setTotalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; }
 
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
+
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
+
+    public void removeItem(OrderItem item) {
+        items.remove(item);
+        item.setOrder(null);
+    }
 
     public static Builder builder() { return new Builder(); }
 
@@ -84,7 +115,7 @@ public class Order {
         private Tenant tenant;
         private LocalDateTime orderDate;
         private Integer totalQuantity;
-        private Double totalAmount;
+        private BigDecimal totalAmount;
         private OrderStatus status;
         private List<OrderItem> items = new ArrayList<>();
 
@@ -93,7 +124,7 @@ public class Order {
         public Builder tenant(Tenant tenant) { this.tenant = tenant; return this; }
         public Builder orderDate(LocalDateTime orderDate) { this.orderDate = orderDate; return this; }
         public Builder totalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; return this; }
-        public Builder totalAmount(Double totalAmount) { this.totalAmount = totalAmount; return this; }
+        public Builder totalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; return this; }
         public Builder status(OrderStatus status) { this.status = status; return this; }
         public Builder items(List<OrderItem> items) { this.items = items; return this; }
 

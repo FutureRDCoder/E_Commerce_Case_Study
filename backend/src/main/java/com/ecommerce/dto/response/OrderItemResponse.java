@@ -1,4 +1,6 @@
-package com.ecommerce.dto;
+package com.ecommerce.dto.response;
+
+import java.math.BigDecimal;
 
 public class OrderItemResponse {
 
@@ -7,13 +9,13 @@ public class OrderItemResponse {
     private String productName;
     private String productCategory;
     private Integer quantity;
-    private Double unitPrice;
-    private Double subtotal;
+    private BigDecimal unitPrice;
+    private BigDecimal subtotal;
     private String productImageUrl;
 
     public OrderItemResponse() {}
 
-    public OrderItemResponse(Long id, Long productId, String productName, String productCategory, Integer quantity, Double unitPrice, Double subtotal, String productImageUrl) {
+    public OrderItemResponse(Long id, Long productId, String productName, String productCategory, Integer quantity, BigDecimal unitPrice, BigDecimal subtotal, String productImageUrl) {
         this.id = id;
         this.productId = productId;
         this.productName = productName;
@@ -39,11 +41,11 @@ public class OrderItemResponse {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public Double getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(Double unitPrice) { this.unitPrice = unitPrice; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
 
-    public Double getSubtotal() { return subtotal; }
-    public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 
     public String getProductImageUrl() { return productImageUrl; }
     public void setProductImageUrl(String productImageUrl) { this.productImageUrl = productImageUrl; }
@@ -56,8 +58,8 @@ public class OrderItemResponse {
         private String productName;
         private String productCategory;
         private Integer quantity;
-        private Double unitPrice;
-        private Double subtotal;
+        private BigDecimal unitPrice;
+        private BigDecimal subtotal;
         private String productImageUrl;
 
         public Builder id(Long id) { this.id = id; return this; }
@@ -65,8 +67,8 @@ public class OrderItemResponse {
         public Builder productName(String productName) { this.productName = productName; return this; }
         public Builder productCategory(String productCategory) { this.productCategory = productCategory; return this; }
         public Builder quantity(Integer quantity) { this.quantity = quantity; return this; }
-        public Builder unitPrice(Double unitPrice) { this.unitPrice = unitPrice; return this; }
-        public Builder subtotal(Double subtotal) { this.subtotal = subtotal; return this; }
+        public Builder unitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; return this; }
+        public Builder subtotal(BigDecimal subtotal) { this.subtotal = subtotal; return this; }
         public Builder productImageUrl(String productImageUrl) { this.productImageUrl = productImageUrl; return this; }
 
         public OrderItemResponse build() {

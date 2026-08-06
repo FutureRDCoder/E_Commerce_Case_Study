@@ -3,20 +3,29 @@ package com.ecommerce.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "favourite_products", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "product_id"})
-})
+@Table(
+        name = "favourite_products",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"user_id", "product_id"}
+                )
+        },
+        indexes = {
+                @Index(name = "idx_favourite_user", columnList = "user_id"),
+                @Index(name = "idx_favourite_product", columnList = "product_id")
+        }
+)
 public class FavouriteProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 

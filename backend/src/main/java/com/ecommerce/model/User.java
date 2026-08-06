@@ -1,9 +1,16 @@
 package com.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        indexes = {
+                @Index(name = "idx_user_tenant",
+                        columnList = "tenant_id")
+        }
+)
 public class User {
 
     @Id
@@ -19,7 +26,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column
+    @Column(nullable = true)
+    @JsonIgnore
     private String password;
 
     @Column(unique = true)
@@ -29,7 +37,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id")
     private Tenant tenant;
 

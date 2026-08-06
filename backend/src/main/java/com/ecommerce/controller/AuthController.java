@@ -1,8 +1,8 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dto.AuthResponse;
-import com.ecommerce.dto.LoginRequest;
-import com.ecommerce.dto.RegisterRequest;
+import com.ecommerce.dto.response.AuthResponse;
+import com.ecommerce.dto.request.LoginRequest;
+import com.ecommerce.dto.request.RegisterRequest;
 import com.ecommerce.model.User;
 import com.ecommerce.service.AuthService;
 import jakarta.validation.Valid;
@@ -35,6 +35,7 @@ public class AuthController {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
+
         AuthResponse response = AuthResponse.builder()
                 .userId(user.getId())
                 .name(user.getName())
@@ -45,6 +46,7 @@ public class AuthController {
                 .tenantSlug(user.getTenant() != null ? user.getTenant().getSlug() : null)
                 .tenantName(user.getTenant() != null ? user.getTenant().getName() : null)
                 .build();
+
         return ResponseEntity.ok(response);
     }
 }

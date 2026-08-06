@@ -1,8 +1,8 @@
 package com.ecommerce.service;
 
-import com.ecommerce.dto.AuthResponse;
-import com.ecommerce.dto.LoginRequest;
-import com.ecommerce.dto.RegisterRequest;
+import com.ecommerce.dto.response.AuthResponse;
+import com.ecommerce.dto.request.LoginRequest;
+import com.ecommerce.dto.request.RegisterRequest;
 import com.ecommerce.exception.BadRequestException;
 import com.ecommerce.model.Role;
 import com.ecommerce.model.User;
@@ -10,12 +10,17 @@ import com.ecommerce.repository.TenantRepository;
 import com.ecommerce.repository.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +61,6 @@ public class AuthServiceTest {
                 .username("testuser")
                 .email("test@example.com")
                 .password("password123")
-                .role(Role.USER)
                 .build();
 
         loginRequest = LoginRequest.builder()
@@ -143,5 +147,30 @@ public class AuthServiceTest {
 
         loginRequest.setUsername("nonexistent");
         assertThrows(BadRequestException.class, () -> authService.login(loginRequest));
+    }
+
+    @Test
+    void testGetCurrentUser_Success() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(mockUser);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(securityContext);
+
+        Optional<User> result = authService.getCurrentUser();
+
+        assertTrue(result.isPresent());
+        assertEquals(mockUser.getUsername(), result.get().getUsername());
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void testGetCurrentUser_NotAuthenticated() {
+        SecurityContextHolder.clearContext();
+
+        Optional<User> result = authService.getCurrentUser();
+
+        assertFalse(result.isPresent());
     }
 }

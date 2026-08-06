@@ -13,11 +13,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByUserIdOrderByOrderDateDesc(Long userId);
 
-    Page<Order> findByUserIdOrderByOrderDateDesc(Long userId, Pageable pageable);
+    List<Order> findByUserIdAndTenantSlugOrderByOrderDateDesc(
+            Long userId,
+            String tenantSlug
+    );
 
     List<Order> findByTenantIdOrderByOrderDateDesc(Long tenantId);
 
-    Page<Order> findByTenantIdOrderByOrderDateDesc(Long tenantId, Pageable pageable);
-
-    List<Order> findByUserIdAndTenantIdOrderByOrderDateDesc(Long userId, Long tenantId);
+    List<Order> findAllByOrderByOrderDateDesc();
 }

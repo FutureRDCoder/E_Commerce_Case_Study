@@ -1,11 +1,13 @@
 package com.ecommerce.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -19,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -35,53 +38,47 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(value -> !value.isBlank())
                 .toArray(String[]::new);
+
+        log.info(
+                "Configured {} allowed CORS origin(s).",
+                this.allowedOrigins.length
+        );
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        log.info("Configuring Spring Security filter chain.");
+
+
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/platform/tenants/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/{tenantSlug}/products/**").permitAll()
-                .requestMatchers("/api/platform/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                    .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtAuthenticationConverter)));
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(this::configureAuthorization)
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(
+                                        keycloakJwtAuthenticationConverter
+                                )
+                        )
+                );
+
+
+        log.info("Spring Security filter chain configured successfully.");
 
         return http.build();
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
-        return new JwtDecoder() {
-            private volatile JwtDecoder delegate;
-
-            @Override
-            public Jwt decode(String token) throws JwtException {
-                if (delegate == null) {
-                    synchronized (this) {
-                        if (delegate == null) {
-                            delegate = org.springframework.security.oauth2.jwt.JwtDecoders.fromIssuerLocation(issuerUri);
-                        }
-                    }
-                }
-                return delegate.decode(token);
-            }
-        };
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        log.debug("Configuring CORS.");
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
@@ -89,5 +86,57 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+
+    private void configureAuthorization(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>
+                    .AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+
+        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+
+        auth.requestMatchers(
+                "/api/auth/register",
+                "/api/auth/login"
+        ).permitAll();
+
+        auth.requestMatchers(
+                "/h2-console/**"
+        ).permitAll();
+
+        auth.requestMatchers(
+                HttpMethod.GET,
+                "/api/platform/tenants",
+                "/api/platform/tenants/**"
+        ).permitAll();
+
+        auth.requestMatchers(
+                HttpMethod.GET,
+                "/*/products",
+                "/*/products/**"
+        ).permitAll();
+
+        auth.requestMatchers(
+                HttpMethod.GET,
+                "/api/public/products",
+                "/api/public/products/**"
+        ).permitAll();
+
+//        auth.requestMatchers(
+//                HttpMethod.GET,
+//                "/{tenantSlug}/products/**"
+//        ).permitAll();
+
+        auth.requestMatchers(
+                HttpMethod.GET,
+                "/api/tenants/**"
+        ).permitAll();
+
+        auth.requestMatchers(
+                "/api/platform/**"
+        ).hasRole("ADMIN");
+
+        auth.anyRequest().authenticated();
     }
 }

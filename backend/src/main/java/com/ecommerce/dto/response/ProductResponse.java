@@ -1,4 +1,6 @@
-package com.ecommerce.dto;
+package com.ecommerce.dto.response;
+
+import java.math.BigDecimal;
 
 public class ProductResponse {
 
@@ -8,7 +10,7 @@ public class ProductResponse {
     private String tenantSlug;
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private String category;
     private Integer availableQuantity;
     private String imageUrl;
@@ -16,7 +18,7 @@ public class ProductResponse {
 
     public ProductResponse() {}
 
-    public ProductResponse(Long id, Long tenantId, String tenantName, String tenantSlug, String name, String description, Double price, String category, Integer availableQuantity, String imageUrl, Boolean isFavourite) {
+    public ProductResponse(Long id, Long tenantId, String tenantName, String tenantSlug, String name, String description, BigDecimal price, String category, Integer availableQuantity, String imageUrl, Boolean isFavourite) {
         this.id = id;
         this.tenantId = tenantId;
         this.tenantName = tenantName;
@@ -48,8 +50,8 @@ public class ProductResponse {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
@@ -72,7 +74,7 @@ public class ProductResponse {
         private String tenantSlug;
         private String name;
         private String description;
-        private Double price;
+        private BigDecimal price;
         private String category;
         private Integer availableQuantity;
         private String imageUrl;
@@ -84,7 +86,7 @@ public class ProductResponse {
         public Builder tenantSlug(String tenantSlug) { this.tenantSlug = tenantSlug; return this; }
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
-        public Builder price(Double price) { this.price = price; return this; }
+        public Builder price(BigDecimal price) { this.price = price; return this; }
         public Builder category(String category) { this.category = category; return this; }
         public Builder availableQuantity(Integer availableQuantity) { this.availableQuantity = availableQuantity; return this; }
         public Builder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }

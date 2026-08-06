@@ -1,7 +1,7 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dto.CreateOrderRequest;
-import com.ecommerce.dto.OrderResponse;
+import com.ecommerce.dto.request.CreateOrderRequest;
+import com.ecommerce.dto.response.OrderResponse;
 import com.ecommerce.model.User;
 import com.ecommerce.service.OrderService;
 import jakarta.validation.Valid;
@@ -32,8 +32,16 @@ public class MultiTenantOrderController {
     }
 
     @GetMapping("/my-history")
-    public ResponseEntity<List<OrderResponse>> getMyOrderHistory(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(orderService.getUserOrderHistory(currentUser));
+    public ResponseEntity<List<OrderResponse>> getMyOrderHistory(
+            @PathVariable String tenantSlug,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return ResponseEntity.ok(
+                orderService.getUserOrderHistory(
+                        tenantSlug,
+                        currentUser
+                )
+        );
     }
 
     @GetMapping
