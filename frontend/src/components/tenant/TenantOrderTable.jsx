@@ -1,6 +1,13 @@
+import { Fragment, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+import OrderDetails from "../order/OrderDetails";
+
 function TenantOrderTable({
   orders = [],
 }) {
+
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   if (orders.length === 0) {
 
@@ -52,44 +59,84 @@ function TenantOrderTable({
 
         <tbody>
 
-          {orders.map((order) => (
+          {orders.map((order) => {
 
-            <tr
-              key={order.id}
-              className="border-t border-white/5 text-slate-300 transition-colors hover:bg-white/[0.03]"
-            >
+            const isExpanded = expandedOrderId === order.id;
 
-              <td className="px-4 py-4 font-medium text-white">
-                #{order.id}
-              </td>
+            const toggleOrder = () =>
+              setExpandedOrderId((current) =>
+                current === order.id ? null : order.id
+              );
 
-              <td className="px-4">
-                {order.userFullName}
-              </td>
+            return (
 
-              <td className="px-4">
-                {new Date(
-                  order.orderDate
-                ).toLocaleDateString()}
-              </td>
+              <Fragment key={order.id}>
 
-              <td className="px-4">
-                <span className="chip chip-success">
-                  {order.status}
-                </span>
-              </td>
+                <tr
+                  onClick={toggleOrder}
+                  className="cursor-pointer border-t border-white/5 text-slate-300 transition-colors hover:bg-white/[0.03]"
+                >
 
-              <td className="px-4">
-                {order.totalQuantity}
-              </td>
+                  <td className="px-4 py-4">
+                    <span className="flex items-center gap-2 font-medium text-white">
+                      #{order.id}
 
-              <td className="px-4 font-semibold text-primary-300">
-                ₹{order.totalAmount}
-              </td>
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-slate-400" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-slate-400" />
+                      )}
+                    </span>
+                  </td>
 
-            </tr>
+                  <td className="px-4">
+                    {order.userFullName}
+                  </td>
 
-          ))}
+                  <td className="px-4">
+                    {new Date(
+                      order.orderDate
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td className="px-4">
+                    <span className="chip chip-success">
+                      {order.status}
+                    </span>
+                  </td>
+
+                  <td className="px-4">
+                    {order.totalQuantity}
+                  </td>
+
+                  <td className="px-4 font-semibold text-primary-300">
+                    ₹{order.totalAmount}
+                  </td>
+
+                </tr>
+
+                {isExpanded && (
+
+                  <tr className="border-t border-white/5 bg-white/[0.02]">
+
+                    <td
+                      colSpan={6}
+                      className="px-4 py-5"
+                    >
+                      <OrderDetails
+                        items={order.items}
+                      />
+                    </td>
+
+                  </tr>
+
+                )}
+
+              </Fragment>
+
+            );
+
+          })}
 
         </tbody>
 

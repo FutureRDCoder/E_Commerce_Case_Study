@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { useOrders } from "../hooks/useOrders";
 import useAuthStore from "../store/authStore";
+import OrderDetails from "../components/order/OrderDetails";
 
 function OrdersPage() {
 
   const { tenantSlug = "global" } = useParams();
+
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   const user = useAuthStore((state) => state.user);
 
@@ -70,42 +75,83 @@ function OrdersPage() {
 
       <div className="space-y-6">
 
-        {orders.map((order) => (
+        {orders.map((order) => {
 
-          <div
-            key={order.id}
-            className="card card-hover p-4 sm:p-6"
-          >
+          const isExpanded = expandedOrderId === order.id;
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          const toggleOrder = () =>
+            setExpandedOrderId((current) =>
+              current === order.id ? null : order.id
+            );
 
-              <h2 className="font-display text-lg font-semibold text-white sm:text-xl">
-                Order #{order.id}
-              </h2>
+          return (
 
-              <span className="chip chip-success self-start sm:self-auto">
-                {order.status}
-              </span>
+            <div
+              key={order.id}
+              onClick={toggleOrder}
+              role="button"
+              tabIndex={0}
+              aria-expanded={isExpanded}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggleOrder();
+                }
+              }}
+              className="card card-hover cursor-pointer p-4 sm:p-6"
+            >
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+                <h2 className="font-display text-lg font-semibold text-white sm:text-xl">
+                  Order #{order.id}
+                </h2>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+
+                  <span className="chip chip-success">
+                    {order.status}
+                  </span>
+
+                  {isExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-slate-400" />
+                  )}
+
+                </div>
+
+              </div>
+
+              <div className="mt-4 grid gap-1 text-sm text-slate-300 sm:grid-cols-3">
+                <p>
+                  Total Items: {order.totalQuantity}
+                </p>
+
+                <p>
+                  Total Amount: ₹{order.totalAmount}
+                </p>
+
+                <p>
+                  Order Date: {order.orderDate}
+                </p>
+              </div>
+
+              {isExpanded && (
+
+                <div className="mt-5 border-t border-white/10 pt-5">
+                  <OrderDetails
+                    items={order.items}
+                  />
+                </div>
+
+              )}
 
             </div>
 
-            <div className="mt-4 grid gap-1 text-sm text-slate-300 sm:grid-cols-3">
-              <p>
-                Total Items: {order.totalQuantity}
-              </p>
+          );
 
-              <p>
-                Total Amount: ₹{order.totalAmount}
-              </p>
-
-              <p>
-                Order Date: {order.orderDate}
-              </p>
-            </div>
-
-          </div>
-
-        ))}
+        })}
 
       </div>
 
