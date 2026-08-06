@@ -40,6 +40,9 @@ public class PlatformUserServiceTest {
     @Mock
     private KeycloakAdminService keycloakAdminService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private PlatformUserService platformUserService;
 
@@ -97,6 +100,7 @@ public class PlatformUserServiceTest {
         assertEquals("nike", response.getTenantSlug());
 
         verify(keycloakAdminService).assignTenantToUser("kc-user-1", "nike");
+        verify(notificationService).notifyTenantAdminAssignment(normalUser, nikeTenant);
         verify(userRepository, times(1)).save(any(User.class));
     }
 

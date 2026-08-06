@@ -16,13 +16,10 @@ export function useClearCart() {
     mutationFn: (tenantSlug) =>
       clearCart(tenantSlug),
 
-    onSuccess: (_, tenantSlug) => {
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "cart",
-          tenantSlug,
-        ],
+        queryKey: ["cart"],
       });
 
     },

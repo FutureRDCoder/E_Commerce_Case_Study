@@ -5,7 +5,7 @@ import { useFavourites } from "../hooks/useFavourites";
 
 function FavouritesPage() {
 
-  const { tenantSlug } = useParams();
+  const { tenantSlug = "global" } = useParams();
 
   const {
     data: favourites,

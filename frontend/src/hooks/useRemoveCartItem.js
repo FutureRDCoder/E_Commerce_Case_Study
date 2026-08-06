@@ -22,13 +22,10 @@ export function useRemoveCartItem() {
         itemId
       ),
 
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "cart",
-          variables.tenantSlug,
-        ],
+        queryKey: ["cart"],
       });
 
       toast.success("Item removed from cart");

@@ -20,20 +20,18 @@ export function useCreateOrder() {
         order
       ),
 
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "orders",
-          variables.tenantSlug,
-        ],
+        queryKey: ["orders"],
       });
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "products",
-          variables.tenantSlug,
-        ],
+        queryKey: ["products"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
       });
 
     },

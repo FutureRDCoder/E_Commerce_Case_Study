@@ -9,13 +9,14 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { useCart } from '../../hooks/useCart';
+import NotificationBell from './NotificationBell';
 
 function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const { isAuthenticated, logout, user } = useAuthStore();
 
-    const cartTenantSlug = user?.tenantSlug || "global";
+    const cartTenantSlug = "global";
 
     const { data: cartItems = [] } = useCart(cartTenantSlug);
 
@@ -76,12 +77,14 @@ function Navbar() {
 
                     {isAuthenticated ? (
                         <>
-                            <Link to={`/${user?.tenantSlug || 'global'}/favourites`} aria-label="Favourites">
+                            <NotificationBell />
+
+                            <Link to="/favourites" aria-label="Favourites">
                                 <Heart className="h-5 w-5 cursor-pointer text-slate-400 transition-colors hover:text-pink-500" />
                             </Link>
 
                             {user?.role !== 'ADMIN' && (
-                                <Link to={`/${user?.tenantSlug || 'global'}/cart`} aria-label="Cart">
+                                <Link to="/cart" aria-label="Cart">
                                     <span className="relative inline-block">
                                         <ShoppingCart className="h-5 w-5 cursor-pointer text-slate-400 transition-colors hover:text-primary-400" />
 
@@ -136,20 +139,28 @@ function Navbar() {
 
                 {/* Mobile Menu Button */}
 
-                <button
-                    onClick={() =>
-                        setMobileMenuOpen(!mobileMenuOpen)
-                    }
-                    aria-label={
-                        mobileMenuOpen
-                            ? "Close menu"
-                            : "Open menu"
-                    }
-                    aria-expanded={mobileMenuOpen}
-                    className="rounded-lg p-2 text-slate-300 transition-colors hover:bg-white/5 md:hidden"
-                >
-                    {mobileMenuOpen ? <X /> : <Menu />}
-                </button>
+                <div className="flex items-center gap-2 md:hidden">
+
+                    {isAuthenticated && (
+                        <NotificationBell />
+                    )}
+
+                    <button
+                        onClick={() =>
+                            setMobileMenuOpen(!mobileMenuOpen)
+                        }
+                        aria-label={
+                            mobileMenuOpen
+                                ? "Close menu"
+                                : "Open menu"
+                        }
+                        aria-expanded={mobileMenuOpen}
+                        className="rounded-lg p-2 text-slate-300 transition-colors hover:bg-white/5"
+                    >
+                        {mobileMenuOpen ? <X /> : <Menu />}
+                    </button>
+
+                </div>
 
             </div>
 
@@ -180,7 +191,7 @@ function Navbar() {
                         {isAuthenticated ? (
                             <>
                                 <NavLink
-                                    to={`/${user?.tenantSlug || 'global'}/favourites`}
+                                    to="/favourites"
                                     className={navLinkClass}
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -190,7 +201,7 @@ function Navbar() {
                                 {user?.role !== 'ADMIN' && (
                                     <>
                                         <NavLink
-                                            to={`/${user?.tenantSlug || 'global'}/cart`}
+                                            to="/cart"
                                             className={navLinkClass}
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
@@ -198,7 +209,7 @@ function Navbar() {
                                         </NavLink>
 
                                         <NavLink
-                                            to={`/${user?.tenantSlug || 'global'}/orders`}
+                                            to="/orders"
                                             className={navLinkClass}
                                             onClick={() => setMobileMenuOpen(false)}
                                         >

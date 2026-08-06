@@ -23,13 +23,10 @@ export function useAddToCart() {
         { productId, quantity }
       ),
 
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "cart",
-          variables.tenantSlug,
-        ],
+        queryKey: ["cart"],
       });
 
       toast.success(

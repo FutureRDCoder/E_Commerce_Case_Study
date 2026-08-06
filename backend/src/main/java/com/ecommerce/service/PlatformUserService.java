@@ -22,14 +22,17 @@ public class PlatformUserService {
     private final UserRepository userRepository;
     private final TenantRepository tenantRepository;
     private final KeycloakAdminService keycloakAdminService;
+    private final NotificationService notificationService;
 
     public PlatformUserService(
             UserRepository userRepository,
             TenantRepository tenantRepository,
-            KeycloakAdminService keycloakAdminService) {
+            KeycloakAdminService keycloakAdminService,
+            NotificationService notificationService) {
         this.userRepository = userRepository;
         this.tenantRepository = tenantRepository;
         this.keycloakAdminService = keycloakAdminService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -88,6 +91,8 @@ public class PlatformUserService {
                 saved.getUsername(),
                 tenant.getSlug()
         );
+
+        notificationService.notifyTenantAdminAssignment(saved, tenant);
 
         return mapToResponse(saved);
     }

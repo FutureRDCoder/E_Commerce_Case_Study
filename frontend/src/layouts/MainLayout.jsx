@@ -2,10 +2,13 @@ import { Outlet } from 'react-router-dom';
 
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import NotificationAlert from '../components/layout/NotificationAlert';
 
 function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col">
+
+      <NotificationAlert />
 
       <Navbar />
 

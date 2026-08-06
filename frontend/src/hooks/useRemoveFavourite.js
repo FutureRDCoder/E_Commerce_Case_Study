@@ -20,28 +20,18 @@ export function useRemoveFavourite() {
         productId
       ),
 
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "products",
-          variables.tenantSlug,
-        ],
+        queryKey: ["products"],
       });
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "product",
-          variables.tenantSlug,
-          variables.productId,
-        ],
+        queryKey: ["product"],
       });
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "favourites",
-          variables.tenantSlug,
-        ],
+        queryKey: ["favourites"],
       });
 
     },

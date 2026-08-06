@@ -47,7 +47,7 @@ eCommerce_Project/
 │       │   │   ├── controller/     # REST controllers (REST API surface)
 │       │   │   ├── dto/            # request/response DTOs
 │       │   │   ├── exception/      # custom exceptions + global error handler
-│       │   │   ├── model/          # JPA entities (User, Tenant, Product, Cart, Order…)
+│   │   │   ├── model/          # JPA entities (User, Tenant, Product, Cart, Order, Notification…)
 │       │   │   ├── repository/     # Spring Data JPA repositories
 │       │   │   ├── security/       # SecurityConfig, JWT -> User converter
 │       │   │   └── service/        # business logic + Keycloak admin/token services
@@ -62,7 +62,7 @@ eCommerce_Project/
     └── src/
         ├── api/                    # axios client, react-query client
         ├── assets/                 # static images
-        ├── components/             # shared UI (navbar, product cards, tables…)
+        ├── components/             # shared UI (navbar, product cards, tables, notification bell…)
         ├── features/               # feature-scoped forms + schemas (auth, products, tenants)
         ├── hooks/                  # react-query data hooks
         ├── layouts/                # MainLayout, TenantDashboardLayout
@@ -104,6 +104,7 @@ Public, cross-brand endpoints live under `/api/...`:
 - `GET /api/tenants/{slug}` — brand details
 - `GET /api/public/products` — browse all products across brands
 - `/api/auth/register`, `/api/auth/login`, `/api/auth/me` — authentication
+- `/api/notifications/**` — in-app alerts for the signed-in user (e.g. promoted to `TENANT_ADMIN`)
 - `/api/platform/**` — **ADMIN only** (manage tenants, users, all orders)
 
 ---
@@ -206,16 +207,17 @@ npm run dev
 ### Role: TENANT_ADMIN (brand manager)
 
 1. Register with the *Tenant Slug* of an existing brand (e.g. `apple`), or have a platform `ADMIN` promote you via the admin dashboard. Log in as that user.
-2. Open the **Dashboard** link (top-right) → `/tenant/dashboard`.
-3. **Manage products** (`/tenant/dashboard/products`):
+2. When promoted by an `ADMIN`, you are **alerted in-app** — a toast pops up and a notification appears in the bell icon (top-right) saying you have been made `TENANT ADMIN` of that brand. Sign out and back in to refresh your token so the Dashboard link appears.
+3. Open the **Dashboard** link (top-right) → `/tenant/dashboard`.
+4. **Manage products** (`/tenant/dashboard/products`):
    - Add new products (name, description, price, category, stock, image).
    - Edit existing products.
    - Update stock quantities.
    - Delete products.
    - These changes appear immediately on the public storefront of that brand.
-4. **View orders** (`/tenant/dashboard/orders`): see every order placed on your brand, with customer, totals, status and items.
-5. **Tenant isolation check:** you can only manage products/orders of *your* brand. Attempts to modify another brand's products (e.g. a `PATCH /sony/products/{id}/stock`) are rejected with `403`.
-6. You can still shop as a normal customer (cart, favourites, orders) for your own brand.
+5. **View orders** (`/tenant/dashboard/orders`): see every order placed on your brand, with customer, totals, status and items.
+6. **Tenant isolation check:** you can only manage products/orders of *your* brand. Attempts to modify another brand's products (e.g. a `PATCH /sony/products/{id}/stock`) are rejected with `403`.
+7. You can still shop as a normal customer (cart, favourites, orders) for your own brand.
 
 ---
 
@@ -224,7 +226,7 @@ npm run dev
 1. Login as the platform admin user (created in Keycloak; username `platform_admin` or `adminuser` works out of the box).
 2. Click **Admin** (top-right) → `/admin/dashboard`. The dashboard has three sections:
    - **Brands:** add a new brand (name, slug, description, logo) or delete an existing one. Deleting a brand removes it from the storefront.
-   - **Assign Brand Admin:** pick any regular `USER` and assign them a brand → they are promoted to `TENANT_ADMIN` (role + `tenantSlug` attribute are applied in Keycloak).
+   - **Assign Brand Admin:** pick any regular `USER` and assign them a brand → they are promoted to `TENANT_ADMIN` (role + `tenantSlug` attribute are applied in Keycloak **behind the scenes**) and the promoted user is **informed by an in-app alert** that they have been made `TENANT ADMIN` of that brand.
    - **All Orders:** view every order placed across all brands.
 3. **Product oversight:** like a tenant admin, the `ADMIN` can also create / edit / delete products and update stock on any brand.
 4. **Negative check:** an `ADMIN` cannot place orders (rejected by the backend), and cart navigation is hidden for admins.
@@ -253,5 +255,8 @@ npm run dev
 | `POST/DELETE /api/platform/tenants`        | `ADMIN` only                    |
 | `GET  /api/platform/users`                 | `ADMIN` only                    |
 | `PUT  /api/platform/users/{id}/tenant`     | `ADMIN` only                    |
+| `GET  /api/notifications`                  | Authenticated                  |
+| `PUT  /api/notifications/{id}/read`        | Authenticated (owner only)     |
+| `PUT  /api/notifications/read-all`         | Authenticated (owner only)     |
 
 All protected endpoints accept an `Authorization: Bearer <jwt>` header, where the token is obtained from `/api/auth/login`.

@@ -24,13 +24,10 @@ export function useUpdateCartItem() {
         quantity
       ),
 
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "cart",
-          variables.tenantSlug,
-        ],
+        queryKey: ["cart"],
       });
 
     },

@@ -12,7 +12,7 @@ import useAuthStore from "../store/authStore";
 
 function CartPage() {
 
-  const { tenantSlug } = useParams();
+  const { tenantSlug = "global" } = useParams();
 
   const navigate = useNavigate();
 
@@ -112,21 +112,33 @@ function CartPage() {
 
   const handlePlaceOrder = async () => {
     try {
-      await createOrder.mutateAsync({
-        tenantSlug,
-        order: {
-          items: cart.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
-        },
-      });
+      const brandGroups = cart.reduce((groups, item) => {
+        const brand = item.tenantSlug;
 
-      clearCart.mutate(tenantSlug);
+        if (!groups[brand]) {
+          groups[brand] = [];
+        }
+
+        groups[brand].push({
+          productId: item.productId,
+          quantity: item.quantity,
+        });
+
+        return groups;
+      }, {});
+
+      for (const [brandSlug, items] of Object.entries(brandGroups)) {
+        await createOrder.mutateAsync({
+          tenantSlug: brandSlug,
+          order: { items },
+        });
+      }
+
+      clearCart.mutate("global");
 
       toast.success("Order placed successfully");
 
-      navigate(`/${tenantSlug}/orders`);
+      navigate("/orders");
     } catch (orderError) {
       toast.error(
         orderError.response?.data?.message ??

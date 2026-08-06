@@ -5,7 +5,7 @@ import useAuthStore from "../store/authStore";
 
 function OrdersPage() {
 
-  const { tenantSlug } = useParams();
+  const { tenantSlug = "global" } = useParams();
 
   const user = useAuthStore((state) => state.user);
 

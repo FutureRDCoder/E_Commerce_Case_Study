@@ -72,6 +72,12 @@ function AppRouter() {
 
           <Route path="/profile" element={<ProfilePage />} />
 
+          <Route path="/cart" element={<CartPage />} />
+
+          <Route path="/orders" element={<OrdersPage />} />
+
+          <Route path="/favourites" element={<FavouritesPage />} />
+
           <Route path="/:tenantSlug/cart" element={<CartPage />} />
 
           <Route path="/:tenantSlug/orders" element={<OrdersPage />} />
