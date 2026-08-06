@@ -208,10 +208,13 @@ function Navbar() {
                                 )}
 
                                 {user?.role === 'ADMIN' && (
-                                    <NavLink
-                                        to="/admin/dashboard"
-                                        className={navLinkClass}
-                        Orders
+                                    <>
+                                        <NavLink
+                                            to="/admin/orders"
+                                            className={navLinkClass}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            Orders
                                         </NavLink>
                                     </>
                                 )}
