@@ -31,7 +31,12 @@ export const registerSchema = z
     tenantSlug: z
       .string()
       .trim()
-      .optional(),
+      .regex(
+        /^[a-z0-9-]*$/,
+        "Tenant slug may contain only lowercase letters, numbers and hyphens."
+      )
+      .optional()
+      .transform((value) => value || undefined),
   })
   .refine(
     (data) => data.password === data.confirmPassword,

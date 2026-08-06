@@ -39,7 +39,7 @@ public class RegisterRequest {
     @Size(max = 100,
             message = "Tenant slug cannot exceed 100 characters.")
     @Pattern(
-            regexp = "^[a-z0-9-]+$",
+            regexp = "^[a-z0-9-]*$",
             message = "Tenant slug may contain only lowercase letters, numbers and hyphens."
     )
     private String tenantSlug;
