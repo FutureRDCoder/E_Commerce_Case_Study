@@ -6,7 +6,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/MultiTenantFavouriteController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/MultiTenantOrderController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/MultiTenantProductController.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/NotificationController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/PlatformOrderController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/PlatformTenantController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/PlatformUserController.java
@@ -25,7 +24,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/request/UpdateCartItemRequest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/AuthResponse.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/CartItemResponse.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/NotificationResponse.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/OrderItemResponse.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/OrderResponse.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/dto/response/ProductResponse.java
@@ -39,7 +37,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/exception/UnauthorizedAccessException.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/CartItem.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/FavouriteProduct.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/Notification.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/Order.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/OrderItem.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/OrderStatus.java
@@ -49,7 +46,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/model/User.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/CartItemRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/FavouriteProductRepository.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/NotificationRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/OrderItemRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/OrderRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/ProductRepository.java
@@ -62,7 +58,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/FavouriteService.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/KeycloakAdminService.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/KeycloakTokenService.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/NotificationService.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/OrderService.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/PlatformUserService.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/service/ProductService.java

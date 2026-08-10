@@ -102,6 +102,10 @@ public class SecurityConfig {
         ).permitAll();
 
         auth.requestMatchers(
+                "/h2-console/**"
+        ).permitAll();
+
+        auth.requestMatchers(
                 HttpMethod.GET,
                 "/api/platform/tenants",
                 "/api/platform/tenants/**"
