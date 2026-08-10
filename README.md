@@ -47,7 +47,7 @@ eCommerce_Project/
 │       │   │   ├── controller/     # REST controllers (REST API surface)
 │       │   │   ├── dto/            # request/response DTOs
 │       │   │   ├── exception/      # custom exceptions + global error handler
-│   │   │   ├── model/          # JPA entities (User, Tenant, Product, Cart, Order, Notification…)
+│       │   │   │   ├── model/          # JPA entities (User, Tenant, Product, Cart, Order, Notification…)
 │       │   │   ├── repository/     # Spring Data JPA repositories
 │       │   │   ├── security/       # SecurityConfig, JWT -> User converter
 │       │   │   └── service/        # business logic + Keycloak admin/token services

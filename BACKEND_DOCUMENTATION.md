@@ -71,7 +71,7 @@ backend/
 │   │   │   │   ├── PublicProductController.java
 │   │   │   │   └── PublicTenantController.java
 │   │   │   ├── dto/
-│   │   │   │   ├── request/                    ← request body DTOs (10 classes)
+│   │   │   │   ├── request/                    ← request body DTOs (11 classes)
 │   │   │   │   │   ├── AssignTenantRequest.java
 │   │   │   │   │   ├── CartItemRequest.java
 │   │   │   │   │   ├── CreateOrderRequest.java
@@ -81,7 +81,8 @@ backend/
 │   │   │   │   │   ├── ProductSearchRequest.java
 │   │   │   │   │   ├── RegisterRequest.java
 │   │   │   │   │   ├── StockUpdateRequest.java
-│   │   │   │   │   └── TenantRequest.java
+│   │   │   │   │   ├── TenantRequest.java
+│   │   │   │   │   └── UpdateCartItemRequest.java
 │   │   │   │   └── response/                   ← response DTOs (8 classes)
 │   │   │   │       ├── AuthResponse.java
 │   │   │   │       ├── CartItemResponse.java
