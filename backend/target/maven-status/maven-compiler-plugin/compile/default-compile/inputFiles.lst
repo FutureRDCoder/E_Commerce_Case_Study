@@ -1,6 +1,7 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/EcommerceApplication.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/config/DataInitializer.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/config/KeycloakProperties.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/config/OpenApiConfig.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/AuthController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/MultiTenantCartController.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/controller/MultiTenantFavouriteController.java

@@ -1,6 +1,7 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/AuthServiceTest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/CartServiceTest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/FavouriteServiceTest.java
+/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/NotificationServiceTest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/OrderServiceTest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/PlatformUserServiceTest.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/test/java/com/ecommerce/service/ProductServiceTest.java

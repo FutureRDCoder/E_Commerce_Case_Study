@@ -102,6 +102,15 @@ public class SecurityConfig {
         ).permitAll();
 
         auth.requestMatchers(
+                "/v3/api-docs/**",
+                "/v3/api-docs.yaml",
+                "/v3/api-docs.json",
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/swagger-resources/**"
+        ).permitAll();
+
+        auth.requestMatchers(
                 "/h2-console/**"
         ).permitAll();
 

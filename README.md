@@ -15,10 +15,11 @@ Authentication and authorization are handled by **Keycloak** (OAuth2 / OIDC), an
 ## Tech Stack
 
 **Backend** (`backend/`)
-- Java 21, Spring Boot 3.5.0
+- Java 21, Spring Boot 3.5.16
 - Spring Web, Spring Data JPA (Hibernate)
 - Spring Security + OAuth2 Resource Server (JWT / Keycloak)
 - H2 file-based database that persists across restarts (with H2 web console)
+- springdoc-openapi (Swagger UI / OpenAPI 3 interactive API documentation)
 - Lombok, Bean Validation, Mockito / JUnit tests (Maven)
 
 **Frontend** (`frontend/`)
@@ -169,6 +170,22 @@ mvn clean spring-boot:run
 - On first startup, the `DataInitializer` seeds 14 brand stores and their products.
 - Run tests with: `mvn test`
 
+### Interactive API documentation (Swagger UI)
+
+The backend ships an OpenAPI 3 (Swagger) specification generated automatically from the REST controllers:
+
+| Resource                          | URL                                        |
+| --------------------------------- | ------------------------------------------ |
+| Swagger UI                        | `http://localhost:8080/swagger-ui.html`    |
+| Swagger UI (direct)               | `http://localhost:8080/swagger-ui/index.html` |
+| OpenAPI spec (JSON)               | `http://localhost:8080/v3/api-docs`        |
+| OpenAPI spec (YAML)               | `http://localhost:8080/v3/api-docs.yaml`   |
+
+- Every endpoint is documented with its parameters, request/response schemas and validation rules.
+- Protected endpoints use a **Bearer JWT** scheme. Click **Authorize** in Swagger UI and paste the token returned by `POST /api/auth/login` (e.g. from the `token` field of the JSON response) to unlock protected endpoints.
+- You can also click **Try it out** on any endpoint to send live requests straight from the browser.
+- The docs reflect the current running backend and update on every restart (no manual spec file to maintain).
+
 ---
 
 ## 3. Run the frontend
@@ -243,6 +260,8 @@ npm run dev
 ---
 
 ## API overview
+
+> Interactive version: open the Swagger UI at `http://localhost:8080/swagger-ui.html`. All endpoints below are mirrored there, with schemas and a live **Try it out** console.
 
 | Method & Path                              | Access                          |
 | ------------------------------------------ | ------------------------------- |

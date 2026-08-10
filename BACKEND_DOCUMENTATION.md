@@ -24,6 +24,7 @@ This document explains every file and directory under `backend/src/` plus `backe
 14. [controller package (REST API)](#14-controller-package-rest-api)
 15. [test package (JUnit 5 + Mockito)](#15-test-package-junit-5--mockito)
 16. [Cross-Cutting Reference Tables](#16-cross-cutting-reference-tables)
+17. [OpenAPI / Swagger UI](#17-openapi--swagger-ui)
 
 ---
 
@@ -57,7 +58,8 @@ backend/
 │   │   │   ├── EcommerceApplication.java      ← Spring Boot entry point
 │   │   │   ├── config/                        ← @Configuration beans
 │   │   │   │   ├── DataInitializer.java        ← dev-only seed data (14 brands, 84 products)
-│   │   │   │   └── KeycloakProperties.java     ← app.keycloak.* @ConfigurationProperties
+│   │   │   │   ├── KeycloakProperties.java     ← app.keycloak.* @ConfigurationProperties
+│   │   │   │   └── OpenApiConfig.java          ← OpenAPI info + bearer security scheme (§6.3)
 │   │   │   ├── controller/                    ← REST endpoints (11 classes)
 │   │   │   │   ├── AuthController.java
 │   │   │   │   ├── MultiTenantCartController.java
@@ -180,14 +182,15 @@ Note: `backend/src/main/resources/` contains **only** `application.properties` �
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.16</version>
     <relativePath/>
 </parent>
 ```
 
-- Inherits dependency management, plugin versions, and default Maven configuration from `spring-boot-starter-parent` **3.5.0**.
+- Inherits dependency management, plugin versions, and default Maven configuration from `spring-boot-starter-parent` **3.5.16**.
 - `<relativePath/>` (empty) tells Maven the parent is a **remote** artifact (from Maven Central), not a file on disk.
 - The parent locks compatible versions for all Spring Boot starters and transitively pins versions like Spring Framework 6.2.x, Spring Security 6.5.x, Hibernate 6.6.x, Jackson, Tomcat, etc.
+- **Why 3.5.16?** springdoc-openapi 2.8.15+ cannot start on Spring Boot 3.5.0 because Spring Framework 6.2.5 (bundled with 3.5.0) rejects the resource-handler pattern springdoc registers (`/swagger-ui/**/*swagger-initializer.js`). The bug was fixed in Spring Web 6.2.8, which is bundled from Spring Boot 3.5.x patches onward, so the parent was bumped to the latest 3.5.x.
 
 ### Lines 12–16: Project coordinates
 
@@ -219,7 +222,7 @@ Note: `backend/src/main/resources/` contains **only** `application.properties` �
 - `<mockito.version>5.23.0</mockito.version>` — user-defined property pinning Mockito to 5.23.0.
 - `<byte-buddy.version>1.18.10</byte-buddy.version>` — user-defined property pinning Byte Buddy (Mockito's mocking engine) to 1.18.10.
 
-### Lines 22–88: `<dependencies>` (all dependencies)
+### Lines 22–93: `<dependencies>` (all dependencies)
 
 | Lines | Coordinates | Scope | Purpose |
 |---|---|---|---|
@@ -228,20 +231,23 @@ Note: `backend/src/main/resources/` contains **only** `application.properties` �
 | 31–34 | `org.springframework.boot:spring-boot-starter-security` | compile | Spring Security 6 filter chain, method security |
 | 35–38 | `org.springframework.boot:spring-boot-starter-oauth2-resource-server` | compile | JWT OAuth2 resource-server: `JwtDecoder`, bearer-token parsing |
 | 39–42 | `org.springframework.boot:spring-boot-starter-validation` | compile | Jakarta Bean Validation (`@Valid`, `@NotBlank`, …) |
-| 43–47 | `com.h2database:h2` | **runtime** | Embedded H2 in-memory/file database + H2 console |
+| 43–47 | `com.mysql:mysql-connector-j` | **runtime** | MySQL JDBC driver (database used by `application.properties`) |
 | 48–52 | `org.projectlombok:lombok` | **optional** | Annotation processing for Lombok (`@Slf4j`); not packaged into the jar |
-| 54–58 | `org.springframework.boot:spring-boot-starter-test` | **test** | JUnit 5, Spring Test, Mockito, AssertJ, JSONassert, Hamcrest |
-| 59–64 | `org.mockito:mockito-core` `${mockito.version}` | **test** | Core Mockito mocking framework (5.23.0) |
-| 65–70 | `org.mockito:mockito-junit-jupiter` `${mockito.version}` | **test** | Mockito + JUnit 5 integration (`MockitoExtension`) |
-| 71–76 | `net.bytebuddy:byte-buddy` `${byte-buddy.version}` | **runtime** | Bytecode generation used by Mockito to create proxies at runtime |
-| 77–82 | `net.bytebuddy:byte-buddy-agent` `${byte-buddy.version}` | **test** | Java agent for inline mock making of final classes |
-| 83–87 | `org.springframework.security:spring-security-test` | **test** | Security test utilities (`@WithMockUser`, `SecurityMockMvcRequestBuilders`) |
+| 53–56 | `org.springdoc:springdoc-openapi-starter-webmvc-ui` `2.8.17` | compile | **springdoc-openapi**: auto-generates the OpenAPI 3 spec and serves the interactive Swagger UI |
+| 58–62 | `org.springframework.boot:spring-boot-starter-test` | **test** | JUnit 5, Spring Test, Mockito, AssertJ, JSONassert, Hamcrest |
+| 63–68 | `org.mockito:mockito-core` `${mockito.version}` | **test** | Core Mockito mocking framework (5.23.0) |
+| 69–74 | `org.mockito:mockito-junit-jupiter` `${mockito.version}` | **test** | Mockito + JUnit 5 integration (`MockitoExtension`) |
+| 75–80 | `net.bytebuddy:byte-buddy` `${byte-buddy.version}` | **runtime** | Bytecode generation used by Mockito to create proxies at runtime |
+| 81–86 | `net.bytebuddy:byte-buddy-agent` `${byte-buddy.version}` | **test** | Java agent for inline mock making of final classes |
+| 87–91 | `org.springframework.security:spring-security-test` | **test** | Security test utilities (`@WithMockUser`, `SecurityMockMvcRequestBuilders`) |
 
-Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers of this artifact do not get Lombok. The `h2` scope is `runtime` so it is on the classpath at runtime but not needed at compile time.
+Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers of this artifact do not get Lombok. The `mysql-connector-j` scope is `runtime` so it is on the classpath at runtime but not needed at compile time.
 
-### Lines 89–121: `<build><plugins>`
+The `springdoc-openapi-starter-webmvc-ui` dependency (lines 53–56) pulls in `springdoc-openapi-starter-webmvc-api` and `springdoc-openapi-starter-common` transitively. It auto-registers the `/v3/api-docs` (JSON), `/v3/api-docs.yaml` (YAML) and `/swagger-ui/**` endpoints, generates schemas from the DTOs, and reads bean-validation annotations (`@NotNull`, `@Size`, …) into the spec.
 
-#### maven-compiler-plugin (lines 91–102)
+### Lines 95–124: `<build><plugins>`
+
+#### maven-compiler-plugin (lines 96–106)
 
 ```xml
 <plugin>
@@ -261,7 +267,7 @@ Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers
 - Configures the Java compiler plugin to run **Lombok as an annotation processor** at compile time. This is what makes `@Slf4j` generate the `log` field.
 - The explicit `annotationProcessorPaths` keeps the compiler isolated from the full classpath when processing annotations.
 
-#### spring-boot-maven-plugin (lines 103–109)
+#### spring-boot-maven-plugin (lines 108–114)
 
 ```xml
 <plugin>
@@ -276,7 +282,7 @@ Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers
 - Enables `mvn spring-boot:run` and repackaging into an executable fat jar.
 - `<mainClass>` explicitly sets the runnable main class to `com.ecommerce.EcommerceApplication`.
 
-#### maven-surefire-plugin (lines 110–119)
+#### maven-surefire-plugin (lines 115–123)
 
 ```xml
 <plugin>
@@ -297,7 +303,7 @@ Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers
 - `<forkCount>1</forkCount>` — runs tests in a single forked JVM.
 - `<reuseForks>false</reuseForks>` — a fresh JVM is forked for each test run (no JVM reuse).
 
-### Line 122: `</project>`
+### Line 125: `</project>`
 
 - Closes the POM root element.
 
@@ -310,31 +316,39 @@ Note: `<optional>true</optional>` on Lombok (line 51) means downstream consumers
 | 1 | `spring.application.name` | `ecommerce-backend` | Application name shown in logs/actuator |
 | 2 | `spring.profiles.active` | `dev` | Active profile = `dev` → enables `@Profile("dev")` `DataInitializer` |
 | 3 | `server.port` | `8080` | Embedded Tomcat listens on HTTP port 8080 |
-| 5 | `spring.datasource.url` | `jdbc:h2:file:./data/ecommercedb` | H2 **file-based** database stored at `./data/ecommercedb` (relative to backend working dir) |
-| 6 | `spring.datasource.driverClassName` | `org.h2.Driver` | JDBC driver class for H2 |
-| 7 | `spring.datasource.username` | `sa` | H2 connection username (default `sa`) |
-| 8 | `spring.datasource.password` | *(empty)* | H2 connection password (none) |
-| 9 | `spring.h2.console.enabled` | `true` | Enables the H2 web console |
-| 10 | `spring.h2.console.path` | `/h2-console` | H2 console served at `/h2-console` |
-| 12 | `spring.jpa.database-platform` | `org.hibernate.dialect.H2Dialect` | Hibernate uses the H2 dialect for SQL generation |
-| 13 | `spring.jpa.hibernate.ddl-auto` | `update` | Hibernate auto-updates the schema from entities (never drops tables) |
-| 14 | `spring.jpa.show-sql` | `false` | Do **not** print each SQL statement to the log |
-| 15 | `spring.jpa.properties.hibernate.format_sql` | `true` | If SQL were shown, it would be pretty-printed |
-| 17 | `app.cors.allowed-origins` | comma-separated list: `http://localhost:3000`, `http://localhost:5173`, `http://127.0.0.1:3000`, `http://127.0.0.1:5173`, plus the same four with `https://` | Origins permitted by CORS (Vite dev server on 5173; React on 3000) |
-| 19 | `app.keycloak.server-url` | `http://localhost:8081` | Base URL of the Keycloak server |
-| 20 | `app.keycloak.realm` | `Omni_Store Realm` | Keycloak realm name (note the space — URL-encoded as `%20`) |
-| 21 | `app.keycloak.client-id` | `Omni_Store_client` | Public/confidential client used for the password grant |
-| 22 | `app.keycloak.client-secret` | `npTpWYLrwIFgyKnr7eRXIkNzNRhUmctZ` | Client secret for the password grant |
-| 23 | `app.keycloak.admin-client-id` | `Omni_Store_client` | Client used to obtain the **admin** token (client-credentials grant) |
-| 24 | `app.keycloak.admin-client-secret` | `npTpWYLrwIFgyKnr7eRXIkNzNRhUmctZ` | Admin client secret (same client in this setup) |
-| 26 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | `http://localhost:8081/realms/Omni_Store%20Realm/protocol/openid-connect/certs` | JWKS endpoint used by the resource server to fetch signing keys and verify JWT signatures |
-| 27 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | `http://localhost:8081/realms/Omni_Store%20Realm` | Validates the token's `iss` claim against this issuer |
-| 29 | `logging.level.org.springframework.security` | `TRACE` | Verbose security logs |
-| 30 | `logging.level.org.springframework.security.oauth2` | `TRACE` | Verbose OAuth2 logs |
-| 31 | `logging.level.org.springframework.security.web.FilterChainProxy` | `TRACE` | Per-request filter chain trace |
-| 32 | `logging.level.org.springframework.security.oauth2.server.resource` | `TRACE` | Verbose resource-server/JWT logs |
+| 5 | `spring.datasource.url` | `jdbc:mysql://localhost:3306/ecommercedb?createDatabaseIfNotExist=true` | MySQL database `ecommercedb` on localhost:3306 (auto-created if missing) |
+| 6 | `spring.datasource.driverClassName` | `com.mysql.cj.jdbc.Driver` | MySQL JDBC driver class |
+| 7 | `spring.datasource.username` | `root` | MySQL connection username |
+| 8 | `spring.datasource.password` | `##Root@1928374655` | MySQL connection password (dev credentials) |
+| 10 | `spring.jpa.database-platform` | `org.hibernate.dialect.MySQLDialect` | Hibernate uses the MySQL dialect for SQL generation |
+| 11 | `spring.jpa.hibernate.ddl-auto` | `update` | Hibernate auto-updates the schema from entities (never drops tables) |
+| 12 | `spring.jpa.show-sql` | `false` | Do **not** print each SQL statement to the log |
+| 13 | `spring.jpa.properties.hibernate.format_sql` | `true` | If SQL were shown, it would be pretty-printed |
+| 15 | `app.cors.allowed-origins` | comma-separated list: `http://localhost:3000`, `http://localhost:5173`, `http://127.0.0.1:3000`, `http://127.0.0.1:5173`, plus the same four with `https://` | Origins permitted by CORS (Vite dev server on 5173; React on 3000) |
+| 18 | `springdoc.api-docs.path` | `/v3/api-docs` | OpenAPI spec (JSON) served at `/v3/api-docs`; YAML at `/v3/api-docs.yaml` |
+| 19 | `springdoc.swagger-ui.path` | `/swagger-ui.html` | Swagger UI entry point (`/swagger-ui.html` redirects to `/swagger-ui/index.html`) |
+| 20 | `springdoc.swagger-ui.operationsSorter` | `method` | Sort operations alphabetically by method in the UI |
+| 21 | `springdoc.swagger-ui.tagsSorter` | `alpha` | Sort tags alphabetically in the UI |
+| 22 | `springdoc.swagger-ui.default-models-expand-depth` | `-1` | Schemas are collapsed by default in the UI |
+| 23 | `springdoc.show-actuator` | `false` | Do not document actuator endpoints |
+| 24 | `springdoc.cache.disabled` | `true` | Disable spec caching so the docs always reflect the current runtime |
+| 25 | `springdoc.server-url` | `http://localhost:8080` | Server URL shown in the OpenAPI spec (used by `OpenApiConfig`) |
+| 27 | `app.keycloak.server-url` | `http://localhost:8081` | Base URL of the Keycloak server |
+| 28 | `app.keycloak.realm` | `Omni_Store Realm` | Keycloak realm name (note the space — URL-encoded as `%20`) |
+| 29 | `app.keycloak.client-id` | `Omni_Store_client` | Public/confidential client used for the password grant |
+| 30 | `app.keycloak.client-secret` | `npTpWYLrwIFgyKnr7eRXIkNzNRhUmctZ` | Client secret for the password grant |
+| 31 | `app.keycloak.admin-client-id` | `Omni_Store_client` | Client used to obtain the **admin** token (client-credentials grant) |
+| 32 | `app.keycloak.admin-client-secret` | `npTpWYLrwIFgyKnr7eRXIkNzNRhUmctZ` | Admin client secret (same client in this setup) |
+| 34 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | `http://localhost:8081/realms/Omni_Store%20Realm/protocol/openid-connect/certs` | JWKS endpoint used by the resource server to fetch signing keys and verify JWT signatures |
+| 35 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | `http://localhost:8081/realms/Omni_Store%20Realm` | Validates the token's `iss` claim against this issuer |
+| 37 | `logging.level.org.springframework.security` | `TRACE` | Verbose security logs |
+| 38 | `logging.level.org.springframework.security.oauth2` | `TRACE` | Verbose OAuth2 logs |
+| 39 | `logging.level.org.springframework.security.web.FilterChainProxy` | `TRACE` | Per-request filter chain trace |
+| 40 | `logging.level.org.springframework.security.oauth2.server.resource` | `TRACE` | Verbose resource-server/JWT logs |
 
 **Security note:** `app.keycloak.client-secret` and `app.keycloak.admin-client-secret` are committed in this file (development setup).
+
+The `springdoc.*` block (lines 17–25) configures the springdoc-openapi integration. It only wires up the *endpoint URLs and UI behaviour* — the actual content of the spec is generated from the controllers (`@RestController`/`@RequestMapping`), DTOs and Bean Validation annotations, then customised by `config/OpenApiConfig.java` (title, description, bearer security scheme).
 
 ---
 
@@ -449,6 +463,70 @@ Seed summary (14 brands × 6 products = **84 products**, all priced in **INR**):
 | `seedLevis` | Levi's / `levis` | 501 Original Jeans ₹7,999 Jeans 80 · 511 Slim Jeans ₹6,999 Jeans 75 · Trucker Denim Jacket ₹9,999 Outerwear 45 · Sunset One Pocket Shirt ₹5,999 Shirts 60 · Graphic Crewneck T-Shirt ₹2,999 T-Shirts 120 · Reversible Leather Belt ₹3,499 Accessories 90 |
 
 All seed image URLs are `https://images.unsplash.com/...?w=600&auto=format&fit=crop`.
+
+### 6.3 OpenApiConfig.java
+
+`package com.ecommerce.config;` (65 lines) — customisation of the springdoc-openapi generated OpenAPI document.
+
+```java
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI ecommerceOpenAPI(
+            @Value("${springdoc.server-url:http://localhost:8080}") String serverUrl) {
+
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Omni Store — Multi-Tenant E-Commerce API")
+                        .description("""
+                                REST API for the Omni Store multi-tenant e-commerce platform.
+
+                                The platform hosts independent brand stores (tenants) such as Samsung, Sony,
+                                IKEA, Apple, Nike and Adidas. Each brand runs its own storefront and product
+                                catalogue, while a central platform administrator governs the brands and the
+                                users attached to them.
+
+                                ## Authentication
+                                Most endpoints require a JWT bearer token obtained from `POST /api/auth/login`
+                                (or Keycloak directly). Use the **Authorize** button and paste the token to
+                                unlock protected endpoints. The backend resolves the JWT into a user with one
+                                of the roles `ADMIN`, `TENANT_ADMIN` or `USER`.
+
+                                ## Roles
+                                | Role           | Scope                                                                 |
+                                | -------------- | ---------------------------------------------------------------------- |
+                                | `ADMIN`        | Platform administrator — manages brands, users and all orders.         |
+                                | `TENANT_ADMIN` | Brand administrator — manages the products and orders of one brand.    |
+                                | `USER`         | Customer — browses brands, manages a cart, favourites and orders.      |
+                                """)
+                        .version("1.0.0")
+                        .contact(new Contact()
+                                .name("Omni Store Backend Team"))
+                        .license(new License()
+                                .name("Proprietary")
+                                .url("https://example.com/license")))
+                .servers(List.of(
+                        new Server()
+                                .url(serverUrl)
+                                .description("Default server URL")))
+                .components(new Components()
+                        .addSecuritySchemes("bearer-jwt", new SecurityScheme()
+                                .name("bearer-jwt")
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
+                                .description("JWT access token returned by `POST /api/auth/login`.")));
+    }
+}
+```
+
+- `@Bean` — registers the `OpenAPI` model that springdoc merges with the auto-generated spec (paths/schemas). The returned object is the top-level `info`, `servers` and `components` block.
+- `.info(...)` — the spec's metadata: title, multi-line Markdown description (including the roles table), version, contact and license.
+- `.servers(...)` — the server URL, taken from `springdoc.server-url` in `application.properties` (defaults to `http://localhost:8080`).
+- `.components().addSecuritySchemes("bearer-jwt", ...)` — defines the HTTP **bearer** security scheme. It makes the **Authorize** button appear in Swagger UI so a JWT can be pasted to unlock protected endpoints. It is defined here rather than applied as a global requirement so the public endpoints are not shown as "locked" — operations still carry a lock only where the backend actually demands a token.
+
+The file uses the `io.swagger.v3.oas.models.*` classes that ship inside the springdoc-openapi dependency (Swagger Core).
 
 ---
 
@@ -881,7 +959,7 @@ private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String me
 
 ## 12. security package
 
-### 12.1 SecurityConfig.java (142 lines)
+### 12.1 SecurityConfig.java (151 lines)
 
 ```java
 @Slf4j
@@ -940,6 +1018,7 @@ http
 |---|---|
 | `OPTIONS /**` | `permitAll()` (CORS preflight) |
 | `/api/auth/register`, `/api/auth/login` | `permitAll()` |
+| `/v3/api-docs/**`, `/v3/api-docs.yaml`, `/v3/api-docs.json`, `/swagger-ui.html`, `/swagger-ui/**`, `/swagger-resources/**` | `permitAll()` (OpenAPI spec + Swagger UI are public) |
 | `/h2-console/**` | `permitAll()` |
 | `GET /api/platform/tenants`, `GET /api/platform/tenants/**` | `permitAll()` (brand list is public for the storefront) |
 | `GET /*/products`, `GET /*/products/**` | `permitAll()` (any `/brand/products` read is public) |
@@ -947,6 +1026,8 @@ http
 | `GET /api/tenants/**` | `permitAll()` |
 | `/api/platform/**` (anything else under platform) | `hasRole("ADMIN")` |
 | `anyRequest()` | `authenticated()` |
+
+The swagger rules keep the interactive docs usable without a token: `/v3/api-docs/**` covers the JSON spec and its config endpoint, `/v3/api-docs.yaml` is a **sibling path** (not under `/v3/api-docs/`) so it needs its own rule, and `/swagger-ui/**` plus `/swagger-ui.html` serve the UI itself. The **Authorize** button inside Swagger UI still lets you paste a JWT for calling protected endpoints from the browser.
 
 There is a commented-out leftover block (`/{tenantSlug}/products/**` permitAll) — dead code.
 
@@ -1520,6 +1601,50 @@ Frontend → POST /{tenantSlug}/orders  (Bearer JWT)
   → OrderResponse (200/201)
   → GlobalExceptionHandler if any exception → ErrorResponse JSON
 ```
+
+---
+
+## 17. OpenAPI / Swagger UI
+
+### 17.1 What it is
+
+The backend auto-generates an **OpenAPI 3.1** specification from the source of truth (controllers, DTOs, validation annotations) and serves it through **springdoc-openapi 2.8.17**. No hand-maintained spec file — the documentation can never drift from the code.
+
+Endpoints exposed:
+
+| URL | Content |
+|---|---|
+| `/swagger-ui.html` | 302 → `/swagger-ui/index.html` (Swagger UI) |
+| `/swagger-ui/index.html` | Interactive Swagger UI (try-it-out console) |
+| `/v3/api-docs` | OpenAPI spec in JSON |
+| `/v3/api-docs.yaml` | OpenAPI spec in YAML |
+
+### 17.2 How it works
+
+- `pom.xml` → `org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17` (see §3). It registers springdoc's controllers, resource handlers and auto-configuration.
+- `application.properties` `springdoc.*` block (see §4) → controls the spec path, UI path and UI behaviour.
+- `config/OpenApiConfig.java` (see §6.3) → the top-level `info` block (title, description, version, contact, license), the server list, and the `bearer-jwt` HTTP security scheme.
+- `security/SecurityConfig.java` → the docs and UI URLs are `permitAll()` (see §12.1).
+
+### 17.3 What springdoc infers automatically
+
+- **Endpoints** from `@RestController` + `@RequestMapping`/`@GetMapping`/… — all 23 paths of this API.
+- **Request bodies & responses** from the DTOs (`dto/request/*`, `dto/response/*`), e.g. `LoginRequest`, `AuthResponse`, `ProductResponse`.
+- **Validation** from Jakarta Bean Validation annotations — `@NotNull`, `@NotBlank`, `@Size`, `@Min`/`@Max`, `@Pattern`, `@DecimalMin`, `@Positive`, `@Email`… show up as `required` flags, `minLength`/`maxLength`, `minimum`/`maximum`, and regex `pattern` constraints.
+- **Query parameters** from `@RequestParam` and from `@Valid` model-attribute request objects (e.g. `ProductSearchRequest` → `category`, `search`, `page`, `size`, `minPrice`, `maxPrice`).
+- **Path parameters** from `@PathVariable` (`tenantSlug`, `id`, `itemId`, `productId`, `notificationId`, `userId`).
+- **Pagination** — Spring Data `Page<T>` responses become `Page{...}` schemas (content, number, size, totalElements, totalPages, …).
+
+### 17.4 Using the Authorize button (JWT)
+
+1. Call `POST /api/auth/login` from Swagger UI (public endpoint) or get a token from the app's login.
+2. Copy the `token` value from the `AuthResponse` JSON.
+3. Click **Authorize** (top-right), paste the token, save.
+4. Protected endpoints are now callable from the UI; the token is sent as `Authorization: Bearer <token>`.
+
+### 17.5 Why Spring Boot is 3.5.16
+
+springdoc 2.8.15+ registers the Swagger UI's `swagger-initializer.js` through `PathPattern.combine`, which on Spring Framework < 6.2.8 produced the invalid pattern `/swagger-ui/**/*swagger-initializer.js` and failed at startup with *"Invalid mapping pattern detected"*. The fix shipped in Spring Web 6.2.8 (Spring bug #34986), bundled with later Spring Boot 3.5.x patches — hence the parent was bumped from 3.5.0 to 3.5.16. The `spring.mvc.pathmatch.matching-strategy=ant_path_matcher` workaround does **not** help here because the failing pattern is built inside springdoc, not during MVC matching.
 
 ---
 

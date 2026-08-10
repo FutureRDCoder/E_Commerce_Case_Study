@@ -16,6 +16,15 @@ function Footer() {
             </span>
           </div>
 
+          <a
+            href={`${import.meta.env.VITE_API_BASE_URL}/swagger-ui/index.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm text-slate-400 transition-colors hover:text-primary-400"
+          >
+            API Docs
+          </a>
+
           <p className="text-sm text-slate-500">
             © {new Date().getFullYear()} eCommerce. All rights reserved.
           </p>
