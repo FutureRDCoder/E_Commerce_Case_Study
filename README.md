@@ -18,7 +18,7 @@ Authentication and authorization are handled by **Keycloak** (OAuth2 / OIDC), an
 - Java 21, Spring Boot 3.5.0
 - Spring Web, Spring Data JPA (Hibernate)
 - Spring Security + OAuth2 Resource Server (JWT / Keycloak)
-- H2 file-based database that persists across restarts (with H2 web console)
+- MySQL database
 - Lombok, Bean Validation, Mockito / JUnit tests (Maven)
 
 **Frontend** (`frontend/`)
@@ -78,7 +78,7 @@ eCommerce_Project/
 The backend follows a layered architecture:
 
 ```
-Controller ──> Service ──> Repository ──> H2 Database
+Controller ──> Service ──> Repository ──> MySQL Database
                     │
                     └──> Keycloak Admin API (user creation, role/tenant assignment)
 ```
@@ -164,8 +164,7 @@ mvn clean spring-boot:run
 ```
 
 - API base URL: `http://localhost:8080`
-- H2 console: `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:file:./data/ecommercedb`, user `sa`, empty password)
-- Data is stored in the file `backend/data/ecommercedb.mv.db` and **persists across restarts** — orders, favourites and cart items survive a backend restart (this file is git-ignored).
+- Data is stored in MySQL (`jdbc:mysql://localhost:3306/ecommercedb`) and **persists across restarts** — orders, favourites and cart items survive a backend restart.
 - On first startup, the `DataInitializer` seeds 14 brand stores and their products.
 - Run tests with: `mvn test`
 

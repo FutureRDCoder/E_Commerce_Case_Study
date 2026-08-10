@@ -16,6 +16,7 @@ com/ecommerce/dto/request/StockUpdateRequest$Builder.class
 com/ecommerce/service/FavouriteService.class
 com/ecommerce/exception/InsufficientStockException.class
 com/ecommerce/service/AuthService.class
+com/ecommerce/service/NotificationService.class
 com/ecommerce/model/Product.class
 com/ecommerce/repository/CartItemRepository.class
 com/ecommerce/dto/request/StockUpdateRequest.class
@@ -31,6 +32,7 @@ com/ecommerce/dto/response/OrderItemResponse$Builder.class
 com/ecommerce/service/KeycloakAdminService$1.class
 com/ecommerce/model/User.class
 com/ecommerce/dto/response/UserResponse$Builder.class
+com/ecommerce/model/Notification.class
 com/ecommerce/dto/response/TenantResponse$Builder.class
 com/ecommerce/model/CartItem$Builder.class
 com/ecommerce/config/DataInitializer.class
@@ -53,6 +55,8 @@ com/ecommerce/service/CartService.class
 com/ecommerce/exception/ResourceNotFoundException.class
 com/ecommerce/controller/MultiTenantCartController.class
 com/ecommerce/model/Order.class
+com/ecommerce/controller/NotificationController.class
+com/ecommerce/dto/response/NotificationResponse.class
 com/ecommerce/dto/request/AssignTenantRequest.class
 com/ecommerce/dto/request/ProductRequest.class
 com/ecommerce/dto/request/TenantRequest$Builder.class
@@ -75,6 +79,7 @@ com/ecommerce/dto/response/OrderResponse.class
 com/ecommerce/model/Tenant$Builder.class
 com/ecommerce/dto/response/CartItemResponse$Builder.class
 com/ecommerce/dto/request/ProductRequest$Builder.class
+com/ecommerce/dto/response/NotificationResponse$Builder.class
 com/ecommerce/repository/TenantRepository.class
 com/ecommerce/exception/BadRequestException.class
 com/ecommerce/dto/request/CreateOrderRequest.class
@@ -92,6 +97,8 @@ com/ecommerce/model/OrderItem.class
 com/ecommerce/repository/ProductRepository.class
 com/ecommerce/model/Tenant.class
 com/ecommerce/controller/PlatformTenantController.class
+com/ecommerce/repository/NotificationRepository.class
+com/ecommerce/model/Notification$Builder.class
 com/ecommerce/service/KeycloakTokenService$2.class
 com/ecommerce/service/ProductService.class
 com/ecommerce/model/OrderItem$Builder.class

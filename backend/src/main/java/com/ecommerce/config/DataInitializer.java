@@ -50,9 +50,9 @@ public class DataInitializer implements CommandLineRunner {
         seedLevis();
     }
 
-    // -----------------------------------------------------
+
     // Helper Methods
-    // -----------------------------------------------------
+
 
     private Tenant createTenant(
             String name,
@@ -92,9 +92,7 @@ public class DataInitializer implements CommandLineRunner {
         );
     }
 
-    // -----------------------------------------------------
     // Brand Seed Methods
-    // -----------------------------------------------------
 
     private void seedSamsung() {
 
