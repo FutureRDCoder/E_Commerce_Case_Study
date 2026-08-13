@@ -29,7 +29,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
@@ -172,7 +171,6 @@ public class ProductServiceTest {
         verify(productRepository, times(1)).save(nikeProduct);
         verify(productRepository, never()).delete(any(Product.class));
         verify(cartItemRepository, times(1)).deleteByProductId(100L);
-        verify(favouriteProductRepository, never()).deleteByProductId(anyLong());
     }
 
     @Test

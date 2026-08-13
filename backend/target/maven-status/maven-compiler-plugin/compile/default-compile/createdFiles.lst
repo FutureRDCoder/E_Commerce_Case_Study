@@ -1,6 +1,5 @@
 com/ecommerce/dto/request/CartItemRequest.class
 com/ecommerce/service/PlatformUserService.class
-com/ecommerce/repository/OrderItemRepository.class
 com/ecommerce/dto/request/LoginRequest$Builder.class
 com/ecommerce/dto/response/CartItemResponse.class
 com/ecommerce/repository/FavouriteProductRepository.class

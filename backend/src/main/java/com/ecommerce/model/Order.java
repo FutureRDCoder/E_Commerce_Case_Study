@@ -97,16 +97,6 @@ public class Order {
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
 
-    public void addItem(OrderItem item) {
-        items.add(item);
-        item.setOrder(this);
-    }
-
-    public void removeItem(OrderItem item) {
-        items.remove(item);
-        item.setOrder(null);
-    }
-
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {

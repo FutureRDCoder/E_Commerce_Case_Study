@@ -51,7 +51,6 @@
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/CartItemRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/FavouriteProductRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/NotificationRepository.java
-/home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/OrderItemRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/OrderRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/ProductRepository.java
 /home/bhcp0016/Desktop/eCommerce/eCommerce_Project/backend/src/main/java/com/ecommerce/repository/TenantRepository.java

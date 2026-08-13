@@ -17,21 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByTenantId(Long tenantId);
 
-    Page<Product> findByTenantId(Long tenantId, Pageable pageable);
-
-    Page<Product> findByTenantIdAndCategoryIgnoreCase(Long tenantId, String category, Pageable pageable);
-
-    Page<Product> findByTenantIdAndNameContainingIgnoreCase(Long tenantId, String name, Pageable pageable);
-
-    Page<Product> findByTenantIdAndCategoryIgnoreCaseAndNameContainingIgnoreCase(Long tenantId, String category, String name, Pageable pageable);
-
     Optional<Product> findByIdAndTenantId(Long id, Long tenantId);
-    
-    Page<Product> findByCategoryIgnoreCase(String category, Pageable pageable);
-    
-    Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
-    
-    Page<Product> findByCategoryIgnoreCaseAndNameContainingIgnoreCase(String category, String name, Pageable pageable);
 
     @Query("""
             SELECT p FROM Product p

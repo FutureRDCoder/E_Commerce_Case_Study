@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -70,53 +69,6 @@ public class TenantService {
         );
 
         return mapToResponse(saved);
-    }
-
-    @Transactional
-    public TenantResponse updateTenant(Long id, TenantRequest request) {
-
-        log.info(
-                "Updating tenant '{}'.",
-                id
-        );
-
-        Tenant tenant = tenantRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Tenant not found with id: " + id
-                        ));
-
-        String slug = request.getSlug().trim().toLowerCase();
-
-        tenantRepository.findBySlugIgnoreCase(slug)
-                .filter(existing -> !existing.getId().equals(id))
-                .ifPresent(existing -> {
-                    throw new BadRequestException(
-                            "Tenant slug already exists: " + slug
-                    );
-                });
-
-        tenantRepository.findByNameIgnoreCase(request.getName())
-                .filter(existing -> !existing.getId().equals(id))
-                .ifPresent(existing -> {
-                    throw new BadRequestException(
-                            "Tenant name already exists: " + request.getName()
-                    );
-                });
-
-        tenant.setName(request.getName());
-        tenant.setSlug(slug);
-        tenant.setDescription(request.getDescription());
-        tenant.setLogoUrl(request.getLogoUrl());
-
-        Tenant updated = tenantRepository.save(tenant);
-
-        log.info(
-                "Tenant '{}' updated successfully.",
-                updated.getId()
-        );
-
-        return mapToResponse(updated);
     }
 
     @Transactional(readOnly = true)

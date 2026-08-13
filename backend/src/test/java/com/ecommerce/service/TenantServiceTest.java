@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -133,52 +132,6 @@ public class TenantServiceTest {
     }
 
     @Test
-    void testUpdateTenant_Success() {
-
-        when(tenantRepository.findById(1L))
-                .thenReturn(Optional.of(nikeTenant));
-
-        when(tenantRepository.findBySlugIgnoreCase("puma"))
-                .thenReturn(Optional.empty());
-
-        when(tenantRepository.findByNameIgnoreCase("Puma"))
-                .thenReturn(Optional.empty());
-
-        Tenant updatedTenant = Tenant.builder()
-                .id(1L)
-                .name("Puma")
-                .slug("puma")
-                .description("Forever Faster")
-                .build();
-
-        when(tenantRepository.save(any(Tenant.class)))
-                .thenReturn(updatedTenant);
-
-        TenantResponse response =
-                tenantService.updateTenant(1L, tenantRequest);
-
-        assertNotNull(response);
-        assertEquals("Puma", response.getName());
-        assertEquals("puma", response.getSlug());
-
-        verify(tenantRepository).save(any(Tenant.class));
-    }
-
-    @Test
-    void testUpdateTenant_NotFound() {
-
-        when(tenantRepository.findById(99L))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> tenantService.updateTenant(99L, tenantRequest)
-        );
-
-        verify(tenantRepository, never()).save(any());
-    }
-
-    @Test
     void testDeleteTenant_Success_DeactivatesWithoutDeletingOrdersOrFavourites() {
         when(tenantRepository.findById(1L)).thenReturn(Optional.of(nikeTenant));
 
@@ -207,49 +160,6 @@ public class TenantServiceTest {
 
         verify(productRepository, times(1)).save(nikeProduct);
         verify(cartItemRepository, times(1)).deleteByProductId(100L);
-    }
-
-    @Test
-    void testUpdateTenant_DuplicateSlug() {
-
-        when(tenantRepository.findById(1L))
-                .thenReturn(Optional.of(nikeTenant));
-
-        Tenant existing = Tenant.builder()
-                .id(5L)
-                .slug("puma")
-                .build();
-
-        when(tenantRepository.findBySlugIgnoreCase("puma"))
-                .thenReturn(Optional.of(existing));
-
-        assertThrows(
-                BadRequestException.class,
-                () -> tenantService.updateTenant(1L, tenantRequest)
-        );
-    }
-
-    @Test
-    void testUpdateTenant_DuplicateName() {
-
-        when(tenantRepository.findById(1L))
-                .thenReturn(Optional.of(nikeTenant));
-
-        when(tenantRepository.findBySlugIgnoreCase("puma"))
-                .thenReturn(Optional.empty());
-
-        Tenant existing = Tenant.builder()
-                .id(5L)
-                .name("Puma")
-                .build();
-
-        when(tenantRepository.findByNameIgnoreCase("Puma"))
-                .thenReturn(Optional.of(existing));
-
-        assertThrows(
-                BadRequestException.class,
-                () -> tenantService.updateTenant(1L, tenantRequest)
-        );
     }
 
     @Test

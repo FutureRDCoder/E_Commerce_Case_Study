@@ -9,9 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
@@ -131,11 +128,6 @@ public class SecurityConfig {
                 "/api/public/products",
                 "/api/public/products/**"
         ).permitAll();
-
-//        auth.requestMatchers(
-//                HttpMethod.GET,
-//                "/{tenantSlug}/products/**"
-//        ).permitAll();
 
         auth.requestMatchers(
                 HttpMethod.GET,
